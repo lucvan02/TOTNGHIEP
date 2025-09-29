@@ -7,12 +7,23 @@ import com.bookwebAI.book_service.entity.ReceiptDetail;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
+//@Mapper(componentModel = "spring")
+//public interface ReceiptMapper {
+//    @Mapping(target = "details", source = "details")
+//    ReceiptDTO toDTO(Receipt receipt);
+//
+//    @Mapping(target = "bookId", source = "book.id")
+//    @Mapping(target = "bookTitle", source = "book.title")
+//    ReceiptDetailDTO toDTO(ReceiptDetail detail);
+//}
+
+
 @Mapper(componentModel = "spring")
 public interface ReceiptMapper {
-    @Mapping(target = "details", source = "details")
-    ReceiptDTO toDTO(Receipt receipt);
+    @Mapping(target = "receiptDetails", source = "details")
+    ReceiptDTO toDTO(Receipt entity);
 
-    @Mapping(target = "bookId", source = "book.id")
-    @Mapping(target = "bookTitle", source = "book.title")
-    ReceiptDetailDTO toDTO(ReceiptDetail detail);
+    List<ReceiptDTO> toDTOs(List<Receipt> entities);
 }

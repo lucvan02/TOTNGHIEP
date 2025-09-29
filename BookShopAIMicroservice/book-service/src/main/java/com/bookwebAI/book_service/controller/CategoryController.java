@@ -39,7 +39,7 @@ public class CategoryController {
     public ResponseEntity<ApiResponse<CategoryDTO>> createCategory(@RequestBody CategoryDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.<CategoryDTO>builder()
-                        .message("Category created successfully")
+                        .message("Lưu thể loại thành công!")
                         .data(service.create(dto))
                         .build());
     }
@@ -50,7 +50,7 @@ public class CategoryController {
             @RequestBody CategoryDTO dto) {
         return ResponseEntity.ok(
                 ApiResponse.<CategoryDTO>builder()
-                        .message("Category updated successfully")
+                        .message("Cập nhật thể loại thành công!")
                         .data(service.update(id, dto))
                         .build()
         );
@@ -61,7 +61,7 @@ public class CategoryController {
         service.delete(id);
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
-                        .message("Category deleted successfully")
+                        .message("Xóa danh mục thành công")
                         .data(null)
                         .build()
         );

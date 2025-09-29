@@ -41,7 +41,7 @@ public class AuthorController {
     public ResponseEntity<ApiResponse<AuthorDTO>> createAuthor(@RequestBody AuthorDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.<AuthorDTO>builder()
-                        .message("Author created successfully")
+                        .message("Thêm tác giả thành công!")
                         .data(service.create(dto))
                         .build());
     }
@@ -52,7 +52,7 @@ public class AuthorController {
             @RequestBody AuthorDTO dto) {
         return ResponseEntity.ok(
                 ApiResponse.<AuthorDTO>builder()
-                        .message("Author updated successfully")
+                        .message("Lưu tác giả thành công!")
                         .data(service.update(id, dto))
                         .build()
         );
@@ -63,7 +63,7 @@ public class AuthorController {
         service.delete(id);
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
-                        .message("Author deleted successfully")
+                        .message("Tác giả đã được xóa!")
                         .data(null)
                         .build()
         );

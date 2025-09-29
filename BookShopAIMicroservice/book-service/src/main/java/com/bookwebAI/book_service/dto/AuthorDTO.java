@@ -5,4 +5,6 @@ import lombok.*;
 public class AuthorDTO {
     private Long id;
     private String name;
+
+    private String description; // thêm
 }

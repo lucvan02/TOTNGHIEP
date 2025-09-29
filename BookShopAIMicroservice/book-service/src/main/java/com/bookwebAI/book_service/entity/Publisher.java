@@ -16,4 +16,5 @@ public class Publisher {
     private Long id;
 
     private String name;
+
 }

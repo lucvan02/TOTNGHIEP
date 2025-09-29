@@ -115,7 +115,7 @@ public class BookController {
         BookDTO created = service.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.<BookDTO>builder()
-                        .message("Book created successfully")
+                        .message("Thêm sách thành công!")
                         .data(created)
                         .build());
     }
@@ -127,7 +127,7 @@ public class BookController {
         BookDTO updated = service.update(id, dto);
         return ResponseEntity.ok(
                 ApiResponse.<BookDTO>builder()
-                        .message("Book updated successfully")
+                        .message("Cập nhật sách thành công!")
                         .data(updated)
                         .build()
         );
@@ -138,7 +138,7 @@ public class BookController {
         service.delete(id);
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
-                        .message("Book deleted successfully")
+                        .message("Xóa sách thành công!")
                         .data(null)
                         .build()
         );
@@ -181,7 +181,7 @@ public class BookController {
         BookDTO updated = service.updateStatus(id, status);
         return ResponseEntity.ok(
                 ApiResponse.<BookDTO>builder()
-                        .message("Book status updated successfully")
+                        .message("Đã câp nhật trạng thái sách")
                         .data(updated)
                         .build()
         );
@@ -203,7 +203,7 @@ public class BookController {
 
         return ResponseEntity.ok(
                 ApiResponse.<BookDTO>builder()
-                        .message("Image uploaded successfully")
+                        .message("Đã tải ảnh lên")
                         .data(updated)
                         .build()
         );
@@ -216,7 +216,7 @@ public class BookController {
         BookDTO updated = service.addAuthors(bookId, authorIds);
         return ResponseEntity.ok(
                 ApiResponse.<BookDTO>builder()
-                        .message("Authors added to book successfully")
+                        .message("Đã thêm tác giả cho sách")
                         .data(updated)
                         .build());
     }
@@ -228,7 +228,7 @@ public class BookController {
         BookDTO updated = service.addCategories(bookId, categoryIds);
         return ResponseEntity.ok(
                 ApiResponse.<BookDTO>builder()
-                        .message("Categories added to book successfully")
+                        .message("Thêm thể loại thành công")
                         .data(updated)
                         .build());
     }

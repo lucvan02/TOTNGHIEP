@@ -40,7 +40,7 @@ public class PublisherController {
     public ResponseEntity<ApiResponse<PublisherDTO>> createPublisher(@RequestBody PublisherDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.<PublisherDTO>builder()
-                        .message("Publisher created successfully")
+                        .message("Thêm nhà xuất bản thành công!")
                         .data(service.create(dto))
                         .build());
     }
@@ -51,7 +51,7 @@ public class PublisherController {
             @RequestBody PublisherDTO dto) {
         return ResponseEntity.ok(
                 ApiResponse.<PublisherDTO>builder()
-                        .message("Publisher updated successfully")
+                        .message("Cập nhật nhà xuất bản thành công!")
                         .data(service.update(id, dto))
                         .build()
         );
@@ -62,7 +62,7 @@ public class PublisherController {
         service.delete(id);
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
-                        .message("Publisher deleted successfully")
+                        .message("Xóa nhà xuất bản thành công!")
                         .data(null)
                         .build()
         );
