@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Table, Button, Popconfirm, message, Input, Tag } from "antd";
 import { useNavigate } from "react-router-dom";
 import bookApi from "../../api/bookApi";
-
+import { Image } from "antd";
 const { Search } = Input;
 
 const BookManage = () => {
@@ -77,11 +77,11 @@ const BookManage = () => {
         columns={[
           { title: "ID", dataIndex: "id" },
           {
-            title: "Ảnh",
+            title: "Ảnh",//dung antd Image để có thể zoom ảnh
             dataIndex: "image",
             render: (img) =>
               img && (
-                <img
+                <Image
                   src={img}
                   alt="book"
                   width={60}
@@ -89,8 +89,15 @@ const BookManage = () => {
                 />
               ),
           },
-          { title: "Tên sách", dataIndex: "title" },
-          { title: "Giá", dataIndex: "price" },
+          //thêm dấu ... vào giữa nếu tên sách quá dài, in đậm, đầy đủ khi hover
+          { title: "Tên sách", dataIndex: "title", render: (title) => (
+              <span style={{ fontWeight: "bold" }} title={title}>
+                {title.length > 20 ? `${title.slice(0, 20)}...` : title}
+              </span>
+            ),
+          },
+          //thêm màu sắc cho giá
+          { title: "Giá", dataIndex: "price", render: (price) => <span style={{ color: "red" }}>{price?.toLocaleString() + " đ"}</span>, },
           { title: "Kho", dataIndex: "stock" },
           { title: "Đã bán", dataIndex: "saleQuantity" },
           {

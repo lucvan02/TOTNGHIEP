@@ -7,9 +7,9 @@ import {
   Select,
   message,
 } from "antd";
+import dayjs from "dayjs";
 import receiptApi from "../../api/receiptApi";
 import bookApi from "../../api/bookApi";
-import dayjs from "dayjs"; // 📌 thêm thư viện format ngày
 
 const { Option } = Select;
 
@@ -26,23 +26,16 @@ const ReceiptManage = () => {
 
   const [messageApi, contextHolder] = message.useMessage();
 
+  // 📌 load danh sách phiếu nhập
   const fetchReceipts = async () => {
     setLoading(true);
     try {
       const res = await receiptApi.getAll();
-
-      // 📌 Thêm tổng tiền cho mỗi phiếu nhập
-      const data = (res.data || []).map((r) => ({
-        ...r,
-        totalAmount: r.receiptDetails?.reduce(
-          (sum, d) => sum + d.quantity * d.importPrice,
-          0
-        ) || 0,
-      }));
-
+      const data = res.data.data || [];
       setReceipts(data);
-    } catch {
-      messageApi.error("Không tải được dữ liệu phiếu nhập");
+      // messageApi.success(res.data.message || "Lấy danh sách phiếu nhập thành công");
+    } catch (err) {
+      messageApi.error(err.response?.data?.message || "Không tải được dữ liệu phiếu nhập");
     } finally {
       setLoading(false);
     }
@@ -52,12 +45,13 @@ const ReceiptManage = () => {
     fetchReceipts();
   }, []);
 
+  // 📌 load danh sách sách
   const fetchBooks = async () => {
     try {
       const res = await bookApi.getAll();
-      setBookOptions(res.data.data || res.data);
-    } catch {
-      messageApi.error("Không tải được danh sách sách");
+      setBookOptions(res.data.data || res.data || []);
+    } catch (err) {
+      messageApi.error(err.response?.data?.message || "Không tải được danh sách sách");
     }
   };
 
@@ -71,6 +65,7 @@ const ReceiptManage = () => {
     setIsModalOpen(false);
   };
 
+  // 📌 thêm sách vào danh sách nhập
   const handleAddBook = (bookId) => {
     const book = bookOptions.find((b) => b.id === bookId);
     if (book && !selectedBooks.find((b) => b.id === bookId)) {
@@ -87,6 +82,7 @@ const ReceiptManage = () => {
     );
   };
 
+  // 📌 lưu phiếu nhập
   const handleSaveReceipt = async () => {
     if (selectedBooks.length === 0) {
       messageApi.warning("Chưa chọn sản phẩm nào!");
@@ -100,29 +96,24 @@ const ReceiptManage = () => {
           importPrice: b.importPrice,
         })),
       };
-      await receiptApi.create(receipt);
-      messageApi.success("Thêm phiếu nhập thành công");
+      const res = await receiptApi.create(receipt);
+      messageApi.success(res.data.message || "Thêm phiếu nhập thành công");
       fetchReceipts();
       setIsModalOpen(false);
-    } catch {
-      messageApi.error("Thêm phiếu nhập thất bại");
+    } catch (err) {
+      messageApi.error(err.response?.data?.message || "Thêm phiếu nhập thất bại");
     }
   };
 
+  // 📌 xem chi tiết phiếu nhập
   const showDetail = async (record) => {
     try {
       const res = await receiptApi.getById(record.id);
-      // 📌 Tính tổng tiền ở chi tiết
-      const totalAmount =
-        res.data.receiptDetails?.reduce(
-          (sum, d) => sum + d.quantity * d.importPrice,
-          0
-        ) || 0;
-
-      setDetailReceipt({ ...res.data, totalAmount });
+      setDetailReceipt(res.data.data);
       setIsDetailOpen(true);
-    } catch {
-      messageApi.error("Không tải được chi tiết phiếu nhập");
+      // messageApi.success(res.data.message || "Lấy chi tiết phiếu nhập thành công");
+    } catch (err) {
+      messageApi.error(err.response?.data?.message || "Không tải được chi tiết phiếu nhập");
     }
   };
 
@@ -134,11 +125,12 @@ const ReceiptManage = () => {
         + Tạo phiếu nhập
       </Button>
 
-      {/* Bảng danh sách phiếu nhập */}
+      {/* 📌 Bảng danh sách phiếu nhập */}
       <Table
         rowKey="id"
         loading={loading}
         dataSource={receipts}
+        bordered
         columns={[
           { title: "Mã phiếu", dataIndex: "id", width: "10%" },
           {
@@ -149,8 +141,8 @@ const ReceiptManage = () => {
           },
           {
             title: "Tổng tiền",
-            dataIndex: "totalAmount",
-            render: (val) => `${val.toLocaleString()} VND`,
+            dataIndex: "total",
+            render: (val) => `${(val || 0).toLocaleString()} VND`,
           },
           {
             title: "Hành động",
@@ -161,10 +153,9 @@ const ReceiptManage = () => {
             ),
           },
         ]}
-        bordered
       />
 
-      {/* Modal tạo phiếu nhập */}
+      {/* 📌 Modal tạo phiếu nhập */}
       <Modal
         title="Tạo phiếu nhập"
         open={isModalOpen}
@@ -217,10 +208,6 @@ const ReceiptManage = () => {
               ),
             },
             {
-              title: "Sau nhập",
-              render: (_, record) => record.stock + record.quantity,
-            },
-            {
               title: "Giá nhập",
               dataIndex: "importPrice",
               render: (_, record) => (
@@ -266,7 +253,7 @@ const ReceiptManage = () => {
         />
       </Modal>
 
-      {/* Modal chi tiết phiếu nhập */}
+      {/* 📌 Modal chi tiết phiếu nhập */}
       <Modal
         title={`Chi tiết phiếu nhập #${detailReceipt?.id}`}
         open={isDetailOpen}
@@ -275,7 +262,7 @@ const ReceiptManage = () => {
         width={900}
       >
         <p><b>Ngày tạo:</b> {dayjs(detailReceipt?.createdAt).format("DD/MM/YYYY HH:mm")}</p>
-        <p><b>Tổng tiền:</b> {detailReceipt?.totalAmount?.toLocaleString()} VND</p>
+        <p><b>Tổng tiền:</b> {(detailReceipt?.total || 0).toLocaleString()} VND</p>
 
         <Table
           rowKey="id"

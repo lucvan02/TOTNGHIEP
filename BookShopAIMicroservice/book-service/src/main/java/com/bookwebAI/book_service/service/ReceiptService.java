@@ -15,31 +15,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-//
-//@Service
-//@RequiredArgsConstructor
-//public class ReceiptService {
-//    private final ReceiptRepository repository;
-//    private final ReceiptMapper mapper;
-//
-//    public List<ReceiptDTO> getAll() {
-//        return repository.findAll().stream().map(mapper::toDTO).toList();
-//    }
-//
-//    public ReceiptDTO getById(Long id) {
-//        return repository.findById(id).map(mapper::toDTO).orElse(null);
-//    }
-//
-//    public ReceiptDTO create(Receipt receipt) {
-//        return mapper.toDTO(repository.save(receipt));
-//    }
-//
-//    public void delete(Long id) {
-//        repository.deleteById(id);
-//    }
-//}
-
-
 
 @Service
 @RequiredArgsConstructor
@@ -47,36 +22,6 @@ public class ReceiptService {
     private final ReceiptRepository receiptRepository;
     private final BookRepository bookRepository;
     private final ReceiptMapper receiptMapper;
-
-//    @Transactional
-//    public ReceiptDTO create(ReceiptDTO dto) {
-//        Receipt receipt = new Receipt();
-//        receipt.setCreatedAt(LocalDateTime.now());
-//
-//        double total = 0.0;
-//        List<ReceiptDetail> details = new ArrayList<>();
-//
-//        for (ReceiptDetailDTO detailDTO : dto.getReceiptDetails()) {
-//            Book book = bookRepository.findById(detailDTO.getBookId())
-//                    .orElseThrow(() -> new RuntimeException("Book not found"));
-//
-//            ReceiptDetail detail = new ReceiptDetail();
-//            detail.setBook(book);
-//            detail.setQuantity(detailDTO.getQuantity());
-//            detail.setImportPrice(detailDTO.getImportPrice());
-//            detail.setReceipt(receipt);
-//
-//            total += detailDTO.getQuantity() * detailDTO.getImportPrice();
-//            details.add(detail);
-//        }
-//
-//        receipt.setTotal(total);
-//        receipt.setDetails(details);
-//
-//        Receipt saved = receiptRepository.save(receipt);
-//        return receiptMapper.toDTO(saved);
-//    }
-
 
     @Transactional
     public ReceiptDTO create(ReceiptDTO dto) {
@@ -117,11 +62,6 @@ public class ReceiptService {
         return receiptMapper.toDTOs(receiptRepository.findAll());
     }
 
-//    public ReceiptDTO getById(Long id) {
-//        return receiptRepository.findById(id)
-//                .map(receiptMapper::toDTO)
-//                .orElseThrow(() -> new RuntimeException("Receipt not found"));
-//    }
 
     public ReceiptDTO getById(Long id) {
         Receipt receipt = receiptRepository.findById(id)
