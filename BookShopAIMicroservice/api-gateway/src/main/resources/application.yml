@@ -7,28 +7,40 @@ spring:
 
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
 
-      routes:
-        - id: auth-service
-          uri: lb://auth-service
-          predicates:
-            - Path=/api/auth/**
+          global cors:
+            corsConfigurations:
+              '[/**]':
+#                allowedOrigins: "http://localhost:5173"
+                allowedOriginPatterns: "*"
+                allowedMethods: "*"
+                allowedHeaders: "*"
+                allowCredentials: true
 
-        - id: user-service
-          uri: lb://user-service
-          predicates:
-            - Path=/api/users/**
-            - Path=/api/profiles/**
-            - Path=/api/favorites/**
 
-        - id: book-service
-          uri: lb://book-service
-          predicates:
-            - Path=/api/books/**, /api/authors/**, /api/categories/**, /api/publishers/**, /api/receipts/**
+          routes:
+            - id: auth-service
+              uri: lb://auth-service
+              predicates:
+                - Path=/api/auth/**
+
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/api/users/**
+                - Path=/api/profiles/**
+                - Path=/api/favorites/**
+
+            - id: book-service
+              uri: lb://book-service
+              predicates:
+                - Path=/api/books/**, /api/authors/**, /api/categories/**, /api/publishers/**, /api/receipts/**
 
 eureka:
   client:

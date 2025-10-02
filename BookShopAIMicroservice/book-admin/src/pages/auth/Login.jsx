@@ -17,7 +17,7 @@ const Login = () => {
 
     return (
         <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Card title="Login" style={{ width: 350 }}>
+            <Card title="Admin" style={{ width: 350 }}>
                 <Form
                     name="login"
                     initialValues={{ remember: true }}

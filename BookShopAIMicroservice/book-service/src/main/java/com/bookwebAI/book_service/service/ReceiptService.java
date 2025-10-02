@@ -117,9 +117,15 @@ public class ReceiptService {
         return receiptMapper.toDTOs(receiptRepository.findAll());
     }
 
+//    public ReceiptDTO getById(Long id) {
+//        return receiptRepository.findById(id)
+//                .map(receiptMapper::toDTO)
+//                .orElseThrow(() -> new RuntimeException("Receipt not found"));
+//    }
+
     public ReceiptDTO getById(Long id) {
-        return receiptRepository.findById(id)
-                .map(receiptMapper::toDTO)
+        Receipt receipt = receiptRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Receipt not found"));
+        return receiptMapper.toDTO(receipt);
     }
 }

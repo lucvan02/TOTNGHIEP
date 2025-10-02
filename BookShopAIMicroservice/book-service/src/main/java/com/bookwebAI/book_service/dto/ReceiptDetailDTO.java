@@ -17,6 +17,7 @@ public class ReceiptDetailDTO {
     private Long id;
     private Long bookId;
     private String bookTitle;
+    private String bookImage;   // ✅ thêm ảnh sách
     private Integer quantity;
     private Double importPrice;
 }

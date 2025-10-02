@@ -11,6 +11,7 @@ import java.util.List;
 public interface ReceiptDetailMapper {
     @Mapping(target = "bookId", source = "book.id")
     @Mapping(target = "bookTitle", source = "book.title")
+    @Mapping(target = "bookImage", source = "book.image") // ✅ map thêm ảnh
     ReceiptDetailDTO toDTO(ReceiptDetail entity);
 
     List<ReceiptDetailDTO> toDTOs(List<ReceiptDetail> entities);

@@ -87,12 +87,12 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/receipts")
+@RequestMapping("/api/receipts")
 @RequiredArgsConstructor
 public class ReceiptController {
     private final ReceiptService service;
 
-    @GetMapping
+    @GetMapping("/get-all")
     public ResponseEntity<List<ReceiptDTO>> getAll() {
         return ResponseEntity.ok(service.getAll());
     }
@@ -102,7 +102,7 @@ public class ReceiptController {
         return ResponseEntity.ok(service.getById(id));
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<ReceiptDTO> create(@RequestBody ReceiptDTO dto) {
         return ResponseEntity.ok(service.create(dto));
     }
