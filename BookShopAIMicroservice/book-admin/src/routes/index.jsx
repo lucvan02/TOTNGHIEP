@@ -10,8 +10,11 @@ import PublisherManage from "../pages/publisher/PublisherManage";
 import ReceiptManage from "../pages/recepit/ReceiptManage";
 // import OrderManage from "../pages/order/OrderManage";
 // import UserManage from "../pages/user/UserManage";
-import BookList from "../pages/book/BookList";
-import BookForm from "../pages/book/BookForm";
+// import BookList from "../pages/book/BookList";
+// import BookForm from "../pages/book/BookForm";
+import BookManage from "../pages/book/BookManage";
+import BookFormPage from "../pages/book/BookFormPage";
+import BookDetail from "../pages/book/BookDetail";
 
 const AppRoutes = () => {
   return (
@@ -20,9 +23,13 @@ const AppRoutes = () => {
       <Route path="/" element={<AdminLayout />}>
         <Route path="statistics" element={<Statistics />} />
         <Route path="authors" element={<AuthorManage />} />
-        <Route path="books" element={<BookList />} />
-        <Route path="books/add" element={<BookForm />} />
-        <Route path="books/edit/:id" element={<BookForm />} />
+        {/* <Route path="books" element={<BookList />} /> */}
+        <Route path="books" element={<BookManage />} />
+        <Route path="books/create" element={<BookFormPage />} />
+        <Route path="books/edit/:id" element={<BookFormPage />} />
+        <Route path="books/detail/:id" element={<BookDetail />} />
+        {/* <Route path="books/add" element={<BookForm />} /> */}
+        {/* <Route path="books/edit/:id" element={<BookForm />} /> */}
 
         <Route path="categories" element={<CategoryManage />} />
         <Route path="publishers" element={<PublisherManage />} />

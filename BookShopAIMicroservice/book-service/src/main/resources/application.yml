@@ -23,5 +23,8 @@ eureka:
 
 
 
-upload:
-  path: D:/BookShopUploads/books/
+#upload:
+#  path: D:/BookShopUploads/books/
+
+file:
+  upload-dir: ../BookShopAIMicroservice/book-admin/public/images/

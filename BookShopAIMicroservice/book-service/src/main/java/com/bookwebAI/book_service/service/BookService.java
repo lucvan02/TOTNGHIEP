@@ -4,200 +4,134 @@ import com.bookwebAI.book_service.dto.BookDTO;
 import com.bookwebAI.book_service.entity.Author;
 import com.bookwebAI.book_service.entity.Book;
 import com.bookwebAI.book_service.entity.Category;
+import com.bookwebAI.book_service.entity.Publisher;
 import com.bookwebAI.book_service.mapper.BookMapper;
 import com.bookwebAI.book_service.repository.AuthorRepository;
 import com.bookwebAI.book_service.repository.BookRepository;
 import com.bookwebAI.book_service.repository.CategoryRepository;
 import com.bookwebAI.book_service.repository.PublisherRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-//@Service
-//@RequiredArgsConstructor
-//public class BookService {
-//    private final BookRepository repository;
-//    private final BookMapper mapper;
-//
-//    public List<BookDTO> getAll() {
-//        return repository.findAll()
-//                .stream()
-//                .map(mapper::toDTO)
-//                .toList();
-//    }
-//
-//    public BookDTO getById(Long id) {
-//        return repository.findById(id)
-//                .map(mapper::toDTO)
-//                .orElse(null);
-//    }
-//
-//    public BookDTO create(BookDTO dto) {
-//        Book book = mapper.toEntity(dto);
-//        return mapper.toDTO(repository.save(book));
-//    }
-//
-//    public BookDTO update(Long id, BookDTO dto) {
-//        return repository.findById(id)
-//                .map(b -> {
-//                    b.setTitle(dto.getTitle());
-//                    b.setDescription(dto.getDescription());
-//                    b.setPrice(dto.getPrice());
-//                    b.setStock(dto.getStock());
-//                    b.setStar(dto.getStar());
-//                    b.setWeight(dto.getWeight());
-//                    b.setImage(dto.getImage());
-//                    // publisher, authors, categories có thể map lại
-//                    return mapper.toDTO(repository.save(b));
-//                }).orElse(null);
-//    }
-//
-//    public void delete(Long id) {
-//        repository.deleteById(id);
-//    }
-//
-//
-//
-//}
-
+import java.util.stream.Collectors;
 
 
 @Service
 @RequiredArgsConstructor
 public class BookService {
-
     private final BookRepository bookRepository;
+    private final PublisherRepository publisherRepository;
     private final AuthorRepository authorRepository;
     private final CategoryRepository categoryRepository;
-    private final PublisherRepository publisherRepository;
-    private final BookMapper mapper;
+    private final BookMapper bookMapper;
 
-    // Get all
     public List<BookDTO> getAll() {
-        return bookRepository.findAll().stream()
-                .map(mapper::toDTO)
-                .toList();
+        return bookMapper.toDTOs(bookRepository.findAll());
     }
 
-    // Get by id
     public BookDTO getById(Long id) {
-        return bookRepository.findById(id).map(mapper::toDTO).orElse(null);
+        return bookRepository.findById(id)
+                .map(bookMapper::toDTO)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
     }
 
-    // Create
     public BookDTO create(BookDTO dto) {
-        Book book = mapper.toEntity(dto);
-
-        if (dto.getPublisherId() != null) {
-            publisherRepository.findById(dto.getPublisherId())
-                    .ifPresent(book::setPublisher);
-        }
-        if (dto.getAuthorIds() != null) {
-            Set<Author> authors = new HashSet<>(authorRepository.findAllById(dto.getAuthorIds()));
-            book.setAuthors(authors);
-        }
-        if (dto.getCategoryIds() != null) {
-            Set<Category> categories = new HashSet<>(categoryRepository.findAllById(dto.getCategoryIds()));
-            book.setCategories(categories);
-        }
-        return mapper.toDTO(bookRepository.save(book));
+        Book book = bookMapper.toEntity(dto);
+        book.setStock(0);
+        book.setSaleQuantity(0);
+        book.setStatus(0); // default HIDDEN
+        return bookMapper.toDTO(bookRepository.save(book));
     }
 
-    // Update
-    public BookDTO update(Long id, BookDTO dto) {
-        Book book = bookRepository.findById(id).orElse(null);
-        if (book == null) return null;
 
+
+    public BookDTO update(Long id, BookDTO dto) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+
+        // cập nhật các field cơ bản
         book.setTitle(dto.getTitle());
         book.setDescription(dto.getDescription());
         book.setPrice(dto.getPrice());
-        book.setStock(dto.getStock());
-        book.setStar(dto.getStar());
         book.setWeight(dto.getWeight());
-        book.setImage(dto.getImage());
+        book.setStar(dto.getStar());
+        book.setStatus(dto.getStatus());
 
-        if (dto.getPublisherId() != null) {
-            publisherRepository.findById(dto.getPublisherId())
-                    .ifPresent(book::setPublisher);
+        // cập nhật publisher
+        if (dto.getPublisher() != null && dto.getPublisher().getId() != null) {
+            Publisher publisher = publisherRepository.findById(dto.getPublisher().getId())
+                    .orElseThrow(() -> new RuntimeException("Publisher not found"));
+            book.setPublisher(publisher);
+        } else {
+            book.setPublisher(null);
         }
-        if (dto.getAuthorIds() != null) {
-            Set<Author> authors = new HashSet<>(authorRepository.findAllById(dto.getAuthorIds()));
+
+        // cập nhật authors (replace toàn bộ)
+        if (dto.getAuthors() != null) {
+            Set<Author> authors = dto.getAuthors().stream()
+                    .map(a -> authorRepository.findById(a.getId())
+                            .orElseThrow(() -> new RuntimeException("Author not found")))
+                    .collect(Collectors.toSet());
             book.setAuthors(authors);
-        }
-        if (dto.getCategoryIds() != null) {
-            Set<Category> categories = new HashSet<>(categoryRepository.findAllById(dto.getCategoryIds()));
-            book.setCategories(categories);
+        } else {
+            book.setAuthors(new HashSet<>());
         }
 
-        return mapper.toDTO(bookRepository.save(book));
+        // cập nhật categories (replace toàn bộ)
+        if (dto.getCategories() != null) {
+            Set<Category> categories = dto.getCategories().stream()
+                    .map(c -> categoryRepository.findById(c.getId())
+                            .orElseThrow(() -> new RuntimeException("Category not found")))
+                    .collect(Collectors.toSet());
+            book.setCategories(categories);
+        } else {
+            book.setCategories(new HashSet<>());
+        }
+
+        return bookMapper.toDTO(bookRepository.save(book));
     }
 
-    // Delete
+
     public void delete(Long id) {
         bookRepository.deleteById(id);
     }
 
-    // Search
-    public List<BookDTO> searchByKeyword(String keyword) {
-        return bookRepository.findByTitleContainingIgnoreCase(keyword)
-                .stream()
-                .map(mapper::toDTO)
-                .toList();
+    public List<BookDTO> search(String keyword) {
+        return bookMapper.toDTOs(bookRepository.findByTitleContainingIgnoreCase(keyword));
     }
 
-    // Filter by category
-    public List<BookDTO> getBooksByCategory(Long categoryId) {
-        return bookRepository.findByCategories_Id(categoryId)
-                .stream()
-                .map(mapper::toDTO)
-                .toList();
-    }
-
-    // Filter by author
-    public List<BookDTO> getBooksByAuthor(Long authorId) {
-        return bookRepository.findByAuthors_Id(authorId)
-                .stream()
-                .map(mapper::toDTO)
-                .toList();
-    }
-
-    // Update status
-    public BookDTO updateStatus(Long id, Integer status) {
-        Book book = bookRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Book not found with id " + id)
-        );
-        if (status < 0 || status > 2) {
-            throw new IllegalArgumentException("Invalid status (0=HIDDEN,1=VISIBLE,2=DISCONTINUED)");
-        }
-        book.setStatus(status);
-        return mapper.toDTO(bookRepository.save(book));
-    }
-
-    // Update image
-    public BookDTO updateImage(Long id, String fileName) {
-        Book book = bookRepository.findById(id).orElseThrow();
-        book.setImage(fileName);
-        return mapper.toDTO(bookRepository.save(book));
-    }
-
-    // Add authors
-    public BookDTO addAuthors(Long bookId, Set<Long> authorIds) {
-        Book book = bookRepository.findById(bookId).orElse(null);
-        if (book == null) return null;
-        Set<Author> authors = new HashSet<>(authorRepository.findAllById(authorIds));
+    public BookDTO addAuthors(Long bookId, List<Long> authorIds) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+        Set<Author> authors = authorIds.stream()
+                .map(aid -> authorRepository.findById(aid)
+                        .orElseThrow(() -> new RuntimeException("Author not found")))
+                .collect(Collectors.toSet());
         book.getAuthors().addAll(authors);
-        return mapper.toDTO(bookRepository.save(book));
+        return bookMapper.toDTO(bookRepository.save(book));
     }
 
-    // Add categories
-    public BookDTO addCategories(Long bookId, Set<Long> categoryIds) {
-        Book book = bookRepository.findById(bookId).orElse(null);
-        if (book == null) return null;
-        Set<Category> categories = new HashSet<>(categoryRepository.findAllById(categoryIds));
+    public BookDTO addCategories(Long bookId, List<Long> categoryIds) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+        Set<Category> categories = categoryIds.stream()
+                .map(cid -> categoryRepository.findById(cid)
+                        .orElseThrow(() -> new RuntimeException("Category not found")))
+                .collect(Collectors.toSet());
         book.getCategories().addAll(categories);
-        return mapper.toDTO(bookRepository.save(book));
+        return bookMapper.toDTO(bookRepository.save(book));
+    }
+
+    public BookDTO uploadImage(Long bookId, MultipartFile file, FileStorageService storageService) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+        String imagePath = storageService.saveFile(file);
+        book.setImage(imagePath);
+        return bookMapper.toDTO(bookRepository.save(book));
     }
 }

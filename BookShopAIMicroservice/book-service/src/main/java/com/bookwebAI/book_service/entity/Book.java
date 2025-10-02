@@ -58,6 +58,7 @@ public class Book {
     private String description;
     private int price;
     private int stock;
+    private Integer saleQuantity;   //  số lượng bán
     private float star;
     private int weight;
     private String image;
@@ -83,5 +84,5 @@ public class Book {
     private Set<Category> categories = new HashSet<>();
 
     // 🔹 Status: 0=HIDDEN, 1=VISIBLE, 2=DISCONTINUED
-    private Integer status = 1;
+    private Integer status; // default VISIBLE
 }
