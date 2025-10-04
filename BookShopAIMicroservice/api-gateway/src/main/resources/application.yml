@@ -34,8 +34,6 @@ spring:
               uri: lb://user-service
               predicates:
                 - Path=/api/users/**
-                - Path=/api/profiles/**
-                - Path=/api/favorites/**
 
             - id: book-service
               uri: lb://book-service

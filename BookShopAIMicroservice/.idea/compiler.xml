@@ -8,8 +8,9 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="api-gateway" />
-        <module name="eureka-server" />
         <module name="auth-service" />
+        <module name="user-service" />
+        <module name="eureka-server" />
       </profile>
       <profile name="Annotation profile for bookweb-microservices" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -30,6 +31,7 @@
       <module name="auth-service" options="-parameters" />
       <module name="book-service" options="-parameters" />
       <module name="eureka-server" options="-parameters" />
+      <module name="user-service" options="-parameters" />
     </option>
   </component>
 </project>
