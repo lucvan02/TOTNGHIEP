@@ -36,26 +36,43 @@
 
 
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import LoginPage from "./pages/Auth/LoginPage";
-import RegisterPage from "./pages/Auth/RegisterPage";
-import VerifyPage from "./pages/Auth/VerifyPage";
-import ProfilePage from "./pages/Auth/ProfilePage";
+// import { BrowserRouter, Routes, Route } from "react-router-dom";
+// import LoginPage from "./pages/Auth/LoginPage";
+// import RegisterPage from "./pages/Auth/RegisterPage";
+// import VerifyPage from "./pages/Auth/VerifyPage";
+// import ProfilePage from "./pages/Auth/ProfilePage";
+// import "antd/dist/reset.css";
+// // import "./styles.css";
+
+// function App() {
+//   return (
+//     <BrowserRouter>
+//       <Routes>
+//         <Route path="/" element={<LoginPage />} />
+//         <Route path="/login" element={<LoginPage />} />
+//         <Route path="/register" element={<RegisterPage />} />
+//         <Route path="/verify" element={<VerifyPage />} />
+//         <Route path="/profile" element={<ProfilePage />} />
+//       </Routes>
+//     </BrowserRouter>
+//   );
+// }
+
+// export default App;
+
+
+
+
+
+
+
+
+import AppRouter from "./routes/AppRouter";
 import "antd/dist/reset.css";
-// import "./styles.css";
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/verify" element={<VerifyPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-      </Routes>
-    </BrowserRouter>
-  );
+  return <AppRouter />;
 }
 
 export default App;
+

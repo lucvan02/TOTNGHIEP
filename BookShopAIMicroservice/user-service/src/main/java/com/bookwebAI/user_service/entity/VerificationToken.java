@@ -2,33 +2,33 @@ package com.bookwebAI.user_service.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.Random;
 
 @Entity
-@Table(name = "verification_tokens")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "verification_tokens")
 public class VerificationToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String token;             // mã xác thực
-    private LocalDateTime expiryDate; // thời hạn sử dụng
-
-    @Column(nullable = false)
-    private String email; // gắn với email user
+    private String email;
+    private String otp;
+    private LocalDateTime expiryDate;
 
     public static VerificationToken create(String email) {
+        String otp = String.valueOf(100000 + new Random().nextInt(900000));
         return VerificationToken.builder()
-                .token(UUID.randomUUID().toString())
                 .email(email)
-                .expiryDate(LocalDateTime.now().plusMinutes(15)) // 15 phút
+                .otp(otp)
+                .expiryDate(LocalDateTime.now().plusMinutes(5))
                 .build();
     }
 
