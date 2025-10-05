@@ -29,7 +29,9 @@ export default function Login() {
       setToken(accessToken);
       localStorage.setItem("user", JSON.stringify(user));
       messageApi.success("Đăng nhập thành công!");
-      navigate("/");
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
     } catch (err) {
       messageApi.error("Sai tên đăng nhập hoặc mật khẩu");
     }
