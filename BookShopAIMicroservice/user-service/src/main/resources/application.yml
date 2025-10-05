@@ -35,3 +35,11 @@ eureka:
     hostname: localhost
     prefer-ip-address: false
     instance-id: ${spring.application.name}:${server.port}
+
+
+google:
+  client:
+    id: 124223479536-3bn4fvk4us52otg229jqq0etjp296s5s.apps.googleusercontent.com
+    secret: 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
+  redirect:
+    uri: http://localhost:3000/authenticate

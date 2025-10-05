@@ -10,4 +10,10 @@ export const authApi = {
   changePassword: (username, data) =>
     axios.post(`${API_URL}/change-password?username=${username}`, data),
   getProfile: (username) => axios.get(`${API_URL}/profile?username=${username}`),
+  googleLogin: (code) => axios.post(`http://localhost:8082/api/auth/google`, { code })
 };
+
+
+// export const authApi = {
+//   googleLogin: (code) => axios.post(`${API_URL}/google`, { code }),
+// };

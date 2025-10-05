@@ -25,15 +25,16 @@ spring:
 
 
           routes:
-            - id: auth-service
-              uri: lb://auth-service
-              predicates:
-                - Path=/api/auth/**
+#            - id: auth-service
+#              uri: lb://auth-service
+#              predicates:
+#                - Path=/api/auth/**
 
             - id: user-service
               uri: lb://user-service
               predicates:
                 - Path=/api/users/**
+                - Path=/api/auth/**
 
             - id: book-service
               uri: lb://book-service

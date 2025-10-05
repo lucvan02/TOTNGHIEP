@@ -30,6 +30,12 @@ export default function Login() {
     }
   };
 
+  
+  const handleClick = () => {
+    const googleAuthUrl = `${OAuthConfig.authUri}?client_id=${OAuthConfig.clientId}&redirect_uri=${OAuthConfig.redirectUri}&response_type=code&scope=openid%20email%20profile`;
+    window.location.href = googleAuthUrl;
+  };
+
   return (
     
     <Box
@@ -89,7 +95,21 @@ export default function Login() {
             >
               Chưa có tài khoản? Đăng ký
             </Button>
+
+           
+            <Button
+              variant="outlined"
+              color="error"
+              fullWidth
+              sx={{ mt: 2 }}
+              href={`https://accounts.google.com/o/oauth2/v2/auth?client_id=124223479536-3bn4fvk4us52otg229jqq0etjp296s5s.apps.googleusercontent.com&redirect_uri=http://localhost:3000/authenticate&response_type=code&scope=openid%20email%20profile`}
+              // onClick={handleClick}
+            >
+              Đăng nhập với Google
+            </Button>
           </Box>
+
+          
         </CardContent>
       </Card>
     </Box>
