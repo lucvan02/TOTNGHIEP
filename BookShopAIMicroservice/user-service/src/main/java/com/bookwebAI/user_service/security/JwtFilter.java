@@ -1,38 +1,42 @@
 package com.bookwebAI.user_service.security;
 
-import com.bookwebAI.user_service.repository.UserRepository;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
-import java.util.List;
 
 @Component
-@RequiredArgsConstructor
-public class JwtFilter extends OncePerRequestFilter {
+public class JwtFilter implements Filter {
 
     private final JwtUtil jwtUtil;
-    private final UserRepository userRepo;
+
+    public JwtFilter(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
-            throws ServletException, IOException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
 
-        String header = req.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
-            String username = jwtUtil.extract(token);
-            userRepo.findByUsername(username).ifPresent(u -> {
-                var auth = new UsernamePasswordAuthenticationToken(username, null, List.of());
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            });
+        HttpServletRequest req = (HttpServletRequest) request;
+        String authHeader = req.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            try {
+                String token = authHeader.substring(7);
+                Claims claims = jwtUtil.validateToken(token);
+                request.setAttribute("userId", claims.getSubject());
+                request.setAttribute("email", claims.get("email"));
+                request.setAttribute("role", claims.get("role"));
+            } catch (Exception e) {
+                ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
         }
-        chain.doFilter(req, res);
+
+        chain.doFilter(request, response);
     }
 }

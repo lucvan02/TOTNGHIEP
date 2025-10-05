@@ -5,39 +5,42 @@ import {
   CardContent,
   TextField,
   Typography,
+  Divider,
 } from "@mui/material";
 import { useState } from "react";
-import { authApi } from "../../api/authApi";
-import { setToken } from "../../api/localStorageService";
-import { useNavigate } from "react-router-dom";
 import { message } from "antd";
+import { authApi, setToken } from "../../api/authApi";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [form, setForm] = useState({ username: "", password: "" });
+  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
 
-    const [messageApi, contextHolder] = message.useMessage();
+  const handleChange = (e) =>
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const res = await authApi.login(form);
-      messageApi.success(res.data.message);
-      setToken(res.data.data);
-      navigate("/profile");
-    } catch {
-      messageApi.error("Đăng nhập thất bại");
+      const { accessToken, user } = res.data.data;
+
+      setToken(accessToken);
+      localStorage.setItem("user", JSON.stringify(user));
+      messageApi.success("Đăng nhập thành công!");
+      navigate("/");
+    } catch (err) {
+      messageApi.error("Sai tên đăng nhập hoặc mật khẩu");
     }
   };
 
-  
-  const handleClick = () => {
-    const googleAuthUrl = `${OAuthConfig.authUri}?client_id=${OAuthConfig.clientId}&redirect_uri=${OAuthConfig.redirectUri}&response_type=code&scope=openid%20email%20profile`;
+  const handleGoogleLogin = () => {
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=124223479536-3bn4fvk4us52otg229jqq0etjp296s5s.apps.googleusercontent.com&redirect_uri=http://localhost:3000/authenticate&response_type=code&scope=openid%20email%20profile`;
     window.location.href = googleAuthUrl;
   };
 
   return (
-    
     <Box
       display="flex"
       justifyContent="center"
@@ -46,33 +49,37 @@ export default function Login() {
       sx={{
         backgroundImage: `url("/logo/login-book-bg.jpg")`,
         backgroundSize: "cover",
+        backgroundPosition: "center",
       }}
     >
       {contextHolder}
-      <Card sx={{ width: 400, p: 3 }}>
+      <Card sx={{ width: 400, boxShadow: 4, borderRadius: 3 }}>
         <CardContent>
-          <Typography variant="h5" textAlign="center" mb={2}>
-            Đăng nhập
+          <Typography variant="h5" textAlign="center" mb={3}>
+            Đăng nhập tài khoản
           </Typography>
+
           <Box component="form" onSubmit={handleSubmit}>
             <TextField
               label="Tên đăng nhập"
               name="username"
+              value={form.username}
+              onChange={handleChange}
               fullWidth
               margin="normal"
-              onChange={(e) =>
-                setForm((f) => ({ ...f, username: e.target.value }))
-              }
+              required
             />
             <TextField
               label="Mật khẩu"
+              name="password"
               type="password"
+              value={form.password}
+              onChange={handleChange}
               fullWidth
               margin="normal"
-              onChange={(e) =>
-                setForm((f) => ({ ...f, password: e.target.value }))
-              }
+              required
             />
+
             <Button
               type="submit"
               variant="contained"
@@ -82,34 +89,31 @@ export default function Login() {
             >
               Đăng nhập
             </Button>
-            {/* quên mật khẩu */}
-            <Button variant="text" fullWidth onClick={() => navigate("/forgot-password")}>
-              Quên mật khẩu?
-            </Button>
+
             <Button
               variant="text"
-              color="secondary"
               fullWidth
-              sx={{ mt: 1 }}
-              onClick={() => navigate("/register")}
+              onClick={() => navigate("/forgot-password")}
             >
-              Chưa có tài khoản? Đăng ký
+              Quên mật khẩu?
             </Button>
 
-           
+            <Divider sx={{ my: 2 }}>Hoặc</Divider>
+
             <Button
               variant="outlined"
               color="error"
               fullWidth
-              sx={{ mt: 2 }}
-              href={`https://accounts.google.com/o/oauth2/v2/auth?client_id=124223479536-3bn4fvk4us52otg229jqq0etjp296s5s.apps.googleusercontent.com&redirect_uri=http://localhost:3000/authenticate&response_type=code&scope=openid%20email%20profile`}
-              // onClick={handleClick}
+              onClick={handleGoogleLogin}
             >
-              Đăng nhập với Google
+              Đăng nhập bằng Google
             </Button>
-          </Box>
 
-          
+            <Typography textAlign="center" mt={2}>
+              Chưa có tài khoản?{" "}
+              <Button onClick={() => navigate("/register")}>Đăng ký ngay</Button>
+            </Typography>
+          </Box>
         </CardContent>
       </Card>
     </Box>

@@ -6,8 +6,8 @@ import ForgotPassword from "../pages/Auth/ForgotPassword";
 import Profile from "../pages/Auth/Profile";
 import Home from "../pages/Home/Home";
 import BookDetail from "../pages/Book/BookDetail";
-// import OAuthCallback from "../pages/Auth/OAuthCallback";
 import Authenticate from "../pages/Auth/Authenticate";
+
 
 export default function AppRouter() {
   return (
@@ -23,6 +23,8 @@ export default function AppRouter() {
         <Route path="/book/:id" element={<BookDetail />} />
 
         <Route path="/authenticate" element={<Authenticate />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="*" element={<h2>404 Not Found</h2>} />
 
       </Routes>
     </BrowserRouter>

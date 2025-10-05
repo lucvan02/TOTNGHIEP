@@ -1,175 +1,25 @@
-//package com.bookwebAI.user_service.service;
-//
-//import com.bookwebAI.user_service.dto.*;
-//import com.bookwebAI.user_service.entity.*;
-//import com.bookwebAI.user_service.mapper.UserMapper;
-//import com.bookwebAI.user_service.repository.*;
-//import com.bookwebAI.user_service.security.JwtUtil;
-//import jakarta.transaction.Transactional;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.stereotype.Service;
-//
-//import java.util.UUID;
-//
-//@Service
-//@RequiredArgsConstructor
-//public class UserService {
-//
-//    private final UserRepository repo;
-//    private final VerificationTokenRepository tokenRepo;
-//    private final PasswordEncoder encoder;
-//    private final EmailService email;
-//    private final JwtUtil jwt;
-//    private final UserMapper mapper;
-//
-//    /** Đăng ký tài khoản và gửi mail xác thực */
-//    public ApiResponse<UserResponseDto> register(UserRegisterDto dto) {
-//        if (repo.existsByUsername(dto.getUsername()) || repo.existsByEmail(dto.getEmail()))
-//            throw new RuntimeException("Username or email already exists");
-//
-//        User user = mapper.toEntity(dto);
-//        user.setUid(UUID.randomUUID());
-//        user.setPassword(encoder.encode(dto.getPassword()));
-//        user.setProvider("LOCAL");
-//        user.setRole("USER");
-//        user.setActive(false); // chờ xác thực email
-//        repo.save(user);
-//
-//        // tạo token xác thực
-//        VerificationToken token = VerificationToken.create(user.getEmail());
-//        tokenRepo.save(token);
-//
-//        String verifyLink = "http://localhost:3000/verify?token=" + token.getToken();
-//        email.send(user.getEmail(), "Verify your account",
-//                "Xin chào " + user.getFirstname() + ",\n\nHãy xác thực tài khoản của bạn tại liên kết:\n" + verifyLink);
-//
-//        return ApiResponse.<UserResponseDto>builder()
-//                .message("User registered successfully. Please check email to verify your account.")
-//                .data(mapper.toResponse(user))
-//                .build();
-//    }
-//
-//    /** Xác minh email (verify link từ FE) */
-//    @Transactional
-//    public ApiResponse<String> verifyEmail(String tokenValue) {
-//        VerificationToken token = tokenRepo.findByToken(tokenValue)
-//                .orElseThrow(() -> new RuntimeException("Invalid verification token"));
-//        if (token.isExpired()) {
-//            throw new RuntimeException("Verification token expired");
-//        }
-//
-//        User user = repo.findByEmail(token.getEmail()).orElseThrow();
-//        user.setActive(true);
-//        repo.save(user);
-//        tokenRepo.deleteByEmail(user.getEmail());
-//
-//        return ApiResponse.<String>builder()
-//                .message("Account verified successfully")
-//                .data("OK")
-//                .build();
-//    }
-//
-//    /** Đăng nhập */
-//    public ApiResponse<String> login(LoginRequest req) {
-//        User user = repo.findByUsername(req.getUsername())
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//        if (!user.isActive())
-//            throw new RuntimeException("Account not active, please verify email");
-//        if (!encoder.matches(req.getPassword(), user.getPassword()))
-//            throw new RuntimeException("Wrong password");
-//
-//        String token = jwt.generate(user.getUsername());
-//        return ApiResponse.<String>builder()
-//                .message("Login success")
-//                .data(token)
-//                .build();
-//    }
-//
-//    /** Gửi mail reset mật khẩu */
-//    public ApiResponse<String> sendResetPassword(String emailAddr) {
-//        User user = repo.findByEmail(emailAddr)
-//                .orElseThrow(() -> new RuntimeException("Email not found"));
-//        tokenRepo.deleteByEmail(user.getEmail());
-//
-//        VerificationToken token = VerificationToken.create(user.getEmail());
-//        tokenRepo.save(token);
-//
-//        email.send(user.getEmail(), "Reset password",
-//                "Mã đặt lại mật khẩu của bạn là: " + token.getToken());
-//
-//        return ApiResponse.<String>builder()
-//                .message("Reset token sent to email")
-//                .data("SENT")
-//                .build();
-//    }
-//
-//    /** Đặt lại mật khẩu */
-//    @Transactional
-//    public ApiResponse<String> resetPassword(String tokenValue, String newPass) {
-//        VerificationToken token = tokenRepo.findByToken(tokenValue)
-//                .orElseThrow(() -> new RuntimeException("Invalid reset token"));
-//        if (token.isExpired()) throw new RuntimeException("Token expired");
-//
-//        User user = repo.findByEmail(token.getEmail()).orElseThrow();
-//        user.setPassword(encoder.encode(newPass));
-//        repo.save(user);
-//        tokenRepo.deleteByEmail(user.getEmail());
-//
-//        return ApiResponse.<String>builder()
-//                .message("Password reset successfully")
-//                .data("OK")
-//                .build();
-//    }
-//
-//    /** Xem thông tin cá nhân */
-//    public ApiResponse<UserResponseDto> getProfile(String username) {
-//        return ApiResponse.<UserResponseDto>builder()
-//                .message("Profile retrieved successfully")
-//                .data(repo.findByUsername(username).map(mapper::toResponse).orElseThrow())
-//                .build();
-//    }
-//
-//    /** Cập nhật thông tin */
-//    public ApiResponse<UserResponseDto> updateProfile(String username, UserUpdateDto dto) {
-//        User user = repo.findByUsername(username).orElseThrow();
-//        mapper.updateFromDto(dto, user);
-//        repo.save(user);
-//        return ApiResponse.<UserResponseDto>builder()
-//                .message("Profile updated successfully")
-//                .data(mapper.toResponse(user))
-//                .build();
-//    }
-//
-//    /** Đổi mật khẩu */
-//    public ApiResponse<String> changePassword(String username, String oldPass, String newPass) {
-//        User user = repo.findByUsername(username).orElseThrow();
-//        if (!encoder.matches(oldPass, user.getPassword()))
-//            throw new RuntimeException("Old password incorrect");
-//        user.setPassword(encoder.encode(newPass));
-//        repo.save(user);
-//
-//        return ApiResponse.<String>builder()
-//                .message("Password changed successfully")
-//                .data("OK")
-//                .build();
-//    }
-//}
-
-
-
 package com.bookwebAI.user_service.service;
 
 import com.bookwebAI.user_service.dto.*;
-import com.bookwebAI.user_service.entity.*;
-import com.bookwebAI.user_service.repository.*;
+import com.bookwebAI.user_service.entity.User;
+import com.bookwebAI.user_service.entity.VerificationToken;
+import com.bookwebAI.user_service.repository.UserRepository;
+import com.bookwebAI.user_service.repository.VerificationTokenRepository;
+import com.bookwebAI.user_service.security.JwtUtil;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.javamail.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.*;
 
-import jakarta.mail.internet.MimeMessage;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -179,7 +29,21 @@ public class UserService {
     private final VerificationTokenRepository tokenRepo;
     private final JavaMailSender mailSender;
     private final PasswordEncoder encoder;
+    private final JwtUtil jwtUtil;
+    private final RestTemplate restTemplate = new RestTemplate();
 
+    @Value("${google.client.id}")
+    private String clientId;
+
+    @Value("${google.client.secret}")
+    private String clientSecret;
+
+    @Value("${google.redirect.uri}")
+    private String redirectUri;
+
+    /*--------------------------------------------------
+     * Helper gửi email
+     *--------------------------------------------------*/
     private void sendMail(String to, String subject, String body) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -193,11 +57,14 @@ public class UserService {
         }
     }
 
+    /*--------------------------------------------------
+     * Đăng ký (local)
+     *--------------------------------------------------*/
     public ApiResponse<String> register(UserRegisterDto dto) {
         if (repo.existsByUsername(dto.getUsername()))
-            return ApiResponse.<String>builder().message("Username already exists").build();
+            return ApiResponse.<String>builder().message("Tên đăng nhập đã tồn tại").build();
         if (repo.existsByEmail(dto.getEmail()))
-            return ApiResponse.<String>builder().message("Email already exists").build();
+            return ApiResponse.<String>builder().message("Email đã tồn tại").build();
 
         User user = User.builder()
                 .username(dto.getUsername())
@@ -221,10 +88,12 @@ public class UserService {
 
         return ApiResponse.<String>builder()
                 .message("Đăng ký thành công, vui lòng kiểm tra email để xác thực.")
-                .data("OK")
                 .build();
     }
 
+    /*--------------------------------------------------
+     * Xác thực OTP
+     *--------------------------------------------------*/
     @Transactional
     public ApiResponse<String> verifyOtp(String email, String otp) {
         VerificationToken token = tokenRepo.findByEmail(email)
@@ -240,15 +109,79 @@ public class UserService {
         return ApiResponse.<String>builder().message("Xác thực thành công").build();
     }
 
-    public ApiResponse<String> login(UserLoginDto dto) {
+    /*--------------------------------------------------
+     * Đăng nhập thường (JWT)
+     *--------------------------------------------------*/
+    public ApiResponse<Map<String, Object>> login(UserLoginDto dto) {
         User user = repo.findByUsername(dto.getUsername()).orElse(null);
         if (user == null || !encoder.matches(dto.getPassword(), user.getPassword()))
-            return ApiResponse.<String>builder().message("Sai tên đăng nhập hoặc mật khẩu").build();
+            return ApiResponse.<Map<String, Object>>builder().message("Sai tên đăng nhập hoặc mật khẩu").build();
         if (!user.isActive())
-            return ApiResponse.<String>builder().message("Tài khoản chưa được kích hoạt").build();
-        return ApiResponse.<String>builder().message("Đăng nhập thành công").data(user.getEmail()).build();
+            return ApiResponse.<Map<String, Object>>builder().message("Tài khoản chưa được kích hoạt").build();
+
+        String token = jwtUtil.generateToken(user.getUsername());
+        Map<String, Object> data = Map.of("token", token, "user", user);
+
+        return ApiResponse.<Map<String, Object>>builder()
+                .message("Đăng nhập thành công")
+                .data(data)
+                .build();
     }
 
+    /*--------------------------------------------------
+     * Đăng nhập với Google OAuth2
+     *--------------------------------------------------*/
+    public ApiResponse<Map<String, Object>> loginWithGoogle(String code) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("code", code);
+        params.add("client_id", clientId);
+        params.add("client_secret", clientSecret);
+        params.add("redirect_uri", redirectUri);
+        params.add("grant_type", "authorization_code");
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(params, headers);
+        ResponseEntity<Map> tokenResponse = restTemplate.exchange(
+                "https://oauth2.googleapis.com/token",
+                HttpMethod.POST,
+                entity,
+                Map.class
+        );
+
+        String accessToken = (String) tokenResponse.getBody().get("access_token");
+
+        // Lấy thông tin user
+        String userInfoUrl = "https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=" + accessToken;
+        GoogleUserInfo googleUser = restTemplate.getForObject(userInfoUrl, GoogleUserInfo.class);
+
+        // Nếu user chưa tồn tại => tạo mới
+        User user = repo.findByEmail(googleUser.getEmail()).orElseGet(() -> {
+            User newUser = User.builder()
+                    .uid(UUID.randomUUID().toString())
+                    .email(googleUser.getEmail())
+                    .firstname(googleUser.getGiven_name())
+                    .lastname(googleUser.getFamily_name())
+                    .avatar(googleUser.getPicture())
+                    .role("USER")
+                    .active(true)
+                    .build();
+            return repo.save(newUser);
+        });
+
+        String jwtToken = jwtUtil.generateToken(user.getEmail());
+        Map<String, Object> data = Map.of("token", jwtToken, "user", user);
+
+        return ApiResponse.<Map<String, Object>>builder()
+                .message("Đăng nhập Google thành công")
+                .data(data)
+                .build();
+    }
+
+    /*--------------------------------------------------
+     * Các chức năng phụ
+     *--------------------------------------------------*/
     public ApiResponse<String> resendOtp(String email) {
         tokenRepo.deleteByEmail(email);
         VerificationToken token = VerificationToken.create(email);
