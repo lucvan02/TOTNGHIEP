@@ -1,11 +1,12 @@
 import { Table, Button } from "antd";
 import dayjs from "dayjs";
 
+
 const ReceiptTable = ({ receipts, loading, onShowDetail }) => (
   <Table
     rowKey="id"
     loading={loading}
-    dataSource={receipts}
+    dataSource={[...(receipts || [])].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))}
     bordered
     columns={[
       { title: "Mã phiếu", dataIndex: "id", width: "10%" },

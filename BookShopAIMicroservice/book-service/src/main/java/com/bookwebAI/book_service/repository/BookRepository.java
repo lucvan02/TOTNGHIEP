@@ -1,7 +1,9 @@
 package com.bookwebAI.book_service.repository;
 
 import com.bookwebAI.book_service.entity.Book;
+import feign.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -9,4 +11,12 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     List<Book> findByTitleContainingIgnoreCase(String keyword);
     List<Book> findByCategories_Id(Long categoryId);
     List<Book> findByAuthors_Id(Long authorId);
+    @Query("SELECT b FROM Book b JOIN b.authors a WHERE a.id = :authorId")
+    List<Book> findByAuthorId(@Param("authorId") Long authorId);
+
+    @Query("SELECT b FROM Book b JOIN b.categories c WHERE c.id = :categoryId")
+    List<Book> findByCategoryId(@Param("categoryId") Long categoryId);
+
+    @Query("SELECT b FROM Book b ORDER BY b.saleQuantity DESC LIMIT 10")
+    List<Book> findTopBySaleQuantity();
 }

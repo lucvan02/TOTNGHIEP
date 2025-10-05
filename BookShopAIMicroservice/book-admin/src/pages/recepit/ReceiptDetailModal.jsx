@@ -26,6 +26,7 @@ const ReceiptDetailModal = ({ receipt, onClose }) => {
         dataSource={receipt.receiptDetails || []}
         columns={[
           { title: "STT", render: (_, __, index) => index + 1, width: "5%" },
+          { title: "Hình ảnh", dataIndex: "bookImage", render: (val) => <img src={val} alt="book" style={{ width: 50 }} /> },
           { title: "Tên sản phẩm", dataIndex: "bookTitle" },
           { title: "Số lượng nhập", dataIndex: "quantity" },
           {

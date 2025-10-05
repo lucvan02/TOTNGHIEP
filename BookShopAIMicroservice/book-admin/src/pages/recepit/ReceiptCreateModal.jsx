@@ -79,6 +79,7 @@ const ReceiptCreateModal = ({ open, onClose, books, onSuccess }) => {
         dataSource={selectedBooks}
         columns={[
           { title: "Mã", dataIndex: "id", width: "5%" },
+          { title: "Hình ảnh", dataIndex: "image", render: (val) => <img src={val} alt="book" style={{ width: 50 }} /> },
           {
             title: "Tên sản phẩm",
             dataIndex: "title",

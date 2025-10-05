@@ -235,7 +235,7 @@ const BookFormPage = () => {
                   onClick={() => setQuickAdd({ type: "publisher", open: true })}
                   style={{ width: "100%", textAlign: "left" }}
                 >
-                  Thêm nhà xuất bản
+                  Thêm nhanh nhà xuất bản
                 </Button>
               </>
             )}
@@ -264,7 +264,7 @@ const BookFormPage = () => {
                   onClick={() => setQuickAdd({ type: "author", open: true })}
                   style={{ width: "100%", textAlign: "left" }}
                 >
-                  Thêm tác giả
+                  Thêm nhanh tác giả
                 </Button>
               </>
             )}
@@ -297,7 +297,7 @@ const BookFormPage = () => {
                   onClick={() => setQuickAdd({ type: "category", open: true })}
                   style={{ width: "100%", textAlign: "left" }}
                 >
-                  Thêm thể loại
+                  Thêm nhanh thể loại
                 </Button>
               </>
             )}

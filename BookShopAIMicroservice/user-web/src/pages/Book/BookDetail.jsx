@@ -38,10 +38,12 @@ export default function BookDetail() {
   if (!book) return <Typography>Không tìm thấy sách</Typography>;
 
   return (
+   
     <Box p={4} display="flex" flexDirection="row" gap={4}>
       <CardMedia
         component="img"
-        image={`http://localhost:8080${book.image}`}
+        // image={`http://localhost:8080${book.image}`}
+        image={book.image}
         alt={book.title}
         sx={{ width: 300, height: 400, objectFit: "cover" }}
       />
@@ -64,5 +66,6 @@ export default function BookDetail() {
         </Typography>
       </Box>
     </Box>
+    
   );
 }

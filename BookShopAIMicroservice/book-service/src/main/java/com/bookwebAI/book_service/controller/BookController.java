@@ -73,4 +73,21 @@ public class BookController {
     public ApiResponse<BookDTO> uploadImage(@PathVariable Long bookId, @RequestParam("file") MultipartFile file) {
         return new ApiResponse<>("Đã tải lên hình ảnh", service.uploadImage(bookId, file, storageService));
     }
+
+    @GetMapping("/by-author/{authorId}")
+    public ResponseEntity<ApiResponse<List<BookDTO>>> getByAuthor(@PathVariable Long authorId) {
+        return ResponseEntity.ok(new ApiResponse<>("Lấy sách theo tác giả thành công", service.getByAuthor(authorId)));
+    }
+
+
+    @GetMapping("/by-category/{categoryId}")
+    public ResponseEntity<ApiResponse<List<BookDTO>>> getByCategory(@PathVariable Long categoryId) {
+        return ResponseEntity.ok(new ApiResponse<>("Lấy sách theo thể loại thành công", service.getByCategory(categoryId)));
+    }
+
+    // Top bán chạy
+    @GetMapping("/top-sale")
+    public ResponseEntity<ApiResponse<List<BookDTO>>> getTopSale() {
+        return ResponseEntity.ok(new ApiResponse<>("Top sách bán chạy", service.getTopSale()));
+    }
 }

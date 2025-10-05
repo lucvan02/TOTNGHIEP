@@ -1,8 +1,9 @@
-import { Modal, Table } from "antd";
+import { Modal, Table, message } from "antd";
 
 const ReceiptPreviewModal = ({ open, data, onCancel, onConfirm }) => {
     // Kiểm tra nếu có bất kỳ dòng nào warn thì disable nút xác nhận
     const hasWarn = data?.some((item) => item.warn);
+    const [messageApi, contextHolder] = message.useMessage();
 
     return (
         <Modal
@@ -15,6 +16,8 @@ const ReceiptPreviewModal = ({ open, data, onCancel, onConfirm }) => {
             width={800}
             okButtonProps={{ disabled: hasWarn }}
         >
+            {contextHolder}
+            
             <Table
                 rowKey={(r, idx) => idx}
                 dataSource={data}
@@ -22,6 +25,7 @@ const ReceiptPreviewModal = ({ open, data, onCancel, onConfirm }) => {
                 pagination={false}
                 columns={[
                     { title: "Mã sách", dataIndex: "bookId" },
+                    { title: "Hình ảnh", dataIndex: "bookImage", render: (val) => <img src={val} alt="book" style={{ width: 50 }} /> },
                     {
                         title: "Tên sách",
                         dataIndex: "bookTitle",
@@ -29,7 +33,7 @@ const ReceiptPreviewModal = ({ open, data, onCancel, onConfirm }) => {
                             record.warn ? <span style={{ color: "orange" }}>⚠ {val} (không khớp DB)</span> : val,
                     },
 
-                    { title: "Số lượng", dataIndex: "quantity" },
+                    { title: "Số lượng nhập", dataIndex: "quantity" },
                     { title: "Giá nhập", dataIndex: "importPrice" },
                     {
                         title: "Thành tiền",

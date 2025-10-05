@@ -134,4 +134,19 @@ public class BookService {
         book.setImage(imagePath);
         return bookMapper.toDTO(bookRepository.save(book));
     }
+
+
+    public List<BookDTO> getByAuthor(Long authorId) {
+        return bookMapper.toDTOList(bookRepository.findByAuthorId(authorId));
+    }
+
+
+    public List<BookDTO> getByCategory(Long categoryId) {
+        return bookMapper.toDTOList(bookRepository.findByCategoryId(categoryId));
+    }
+
+
+    public List<BookDTO> getTopSale() {
+        return bookMapper.toDTOList(bookRepository.findTopBySaleQuantity());
+    }
 }
