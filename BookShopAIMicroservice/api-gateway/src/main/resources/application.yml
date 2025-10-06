@@ -36,6 +36,12 @@ spring:
               predicates:
                 - Path=/api/books/**, /api/authors/**, /api/categories/**, /api/publishers/**, /api/receipts/**
 
+            - id: order-service
+              uri: lb://order-service
+              predicates:
+                - Path=/api/orders/**, /api/carts/**, /api/reviews/**
+
+
 eureka:
   client:
     service-url:

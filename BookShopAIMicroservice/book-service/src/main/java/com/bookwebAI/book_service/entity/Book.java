@@ -55,6 +55,7 @@ public class Book {
     private Long id;
 
     private String title;
+    @Column(length = 2550)
     private String description;
     private int price;
     private int stock;

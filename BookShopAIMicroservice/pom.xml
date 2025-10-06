@@ -12,9 +12,9 @@
     <modules>
         <module>eureka-server</module>
         <module>api-gateway</module>
-<!--        <module>user-service</module>-->
+        <module>user-service</module>
         <module>book-service</module>
-<!--        <module>order-service</module>-->
+        <module>order-service</module>
 <!--        <module>recommendation-service</module>-->
 <!--        <module>chatbot-service</module>-->
     </modules>

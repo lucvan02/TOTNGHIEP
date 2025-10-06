@@ -12,6 +12,7 @@ import com.bookwebAI.book_service.repository.CategoryRepository;
 import com.bookwebAI.book_service.repository.PublisherRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -149,4 +150,27 @@ public class BookService {
     public List<BookDTO> getTopSale() {
         return bookMapper.toDTOList(bookRepository.findTopBySaleQuantity());
     }
+
+    //tạo hàm giảm stock sách
+    @Transactional
+    public void decreaseStock(Long id, Integer qty) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+        if (book.getStock() < qty) {
+            throw new IllegalArgumentException("Not enough stock");
+        } else {
+            book.setStock(book.getStock() - qty);
+            bookRepository.save(book);
+        }
+    }
+
+    //tạo hàm tăng số lượng bán của sách
+    @Transactional
+    public void increaseSale(Long id, Integer qty) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+        book.setSaleQuantity(book.getSaleQuantity() + qty);
+        bookRepository.save(book);
+    }
+
 }
