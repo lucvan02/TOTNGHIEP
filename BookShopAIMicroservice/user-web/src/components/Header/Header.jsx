@@ -245,6 +245,7 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { useNavigate } from "react-router-dom";
@@ -301,8 +302,9 @@ export default function Header() {
   const isCategoryOpen = Boolean(menuCategoryEl);
 
   React.useEffect(() => {
-    const token = getToken();
-    setIsLoggedIn(!!token);
+    // const token = getToken();
+    // setIsLoggedIn(!!token);
+    setIsLoggedIn(!!localStorage.getItem("user"));
 
     // Gọi API lấy danh sách thể loại
     const fetchCategories = async () => {
@@ -412,15 +414,29 @@ export default function Header() {
               Đăng nhập
             </Button>
           ) : (
-            <IconButton
-              size="large"
-              edge="end"
-              aria-controls={menuId}
-              onClick={handleProfileMenuOpen}
-              color="inherit"
-            >
-              <AccountCircle />
-            </IconButton>
+            //them icon gio hang ben canh icon nguoi dung
+
+            <>
+          
+                <IconButton
+                  size="large"
+                  edge="end"
+                  aria-label="cart"
+                  color="inherit"
+                  onClick={() => navigate("/cart")}
+                >
+                  <ShoppingCartIcon />
+                </IconButton>
+                
+                <IconButton
+                  size="large"
+                  edge="end"
+                  aria-controls={menuId}
+                  onClick={handleProfileMenuOpen}
+                  color="inherit"
+                >
+                  <AccountCircle />
+                </IconButton></>
           )}
         </Toolbar>
       </AppBar>

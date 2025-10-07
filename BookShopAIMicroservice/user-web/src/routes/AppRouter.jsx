@@ -7,6 +7,7 @@ import Profile from "../pages/Auth/Profile";
 import Home from "../pages/Home/Home";
 import BookDetail from "../pages/Book/BookDetail";
 import Authenticate from "../pages/Auth/Authenticate";
+import Cart from "../pages/Cart/Cart";
 
 
 export default function AppRouter() {
@@ -24,6 +25,7 @@ export default function AppRouter() {
 
         <Route path="/authenticate" element={<Authenticate />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/cart" element={<Cart />} />
         <Route path="*" element={<h2>404 Not Found</h2>} />
 
       </Routes>

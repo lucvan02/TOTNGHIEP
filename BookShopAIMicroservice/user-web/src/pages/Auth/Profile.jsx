@@ -106,7 +106,7 @@ export default function Profile() {
     // Giả lập upload ảnh — có thể thay bằng API thực tế
     const fakeUrl = URL.createObjectURL(file);
     setUser((prev) => ({ ...prev, avatar: fakeUrl }));
-    messageApi.info("Ảnh đại diện đã được thay đổi tạm thời!");
+    // messageApi.info("Ảnh đại diện đã được thay đổi tạm thời!");
   };
 
   return (

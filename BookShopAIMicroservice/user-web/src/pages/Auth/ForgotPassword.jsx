@@ -15,8 +15,20 @@ export default function ForgotPassword() {
     }
   };
 
+  
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+    //them nut quay lai trang dang nhap va background image
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      height="100vh"
+      sx={{
+        backgroundImage: "url('/logo/login-book-bg.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
       <Card sx={{ p: 4, width: 350 }}>
         <Typography variant="h6" textAlign="center" mb={2}>
           Quên mật khẩu
