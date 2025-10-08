@@ -28,3 +28,9 @@ eureka:
 
 file:
   upload-dir: ../BookShopAIMicroservice/book-admin/public/images/
+
+cloudinary:
+  cloud-name: db2msyrav
+  api-key: 182376673232716
+  api-secret: MxXEURE5DJB6hjJPy2nIiXfigVI
+

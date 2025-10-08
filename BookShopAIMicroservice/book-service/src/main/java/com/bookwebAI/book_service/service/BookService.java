@@ -30,6 +30,7 @@ public class BookService {
     private final AuthorRepository authorRepository;
     private final CategoryRepository categoryRepository;
     private final BookMapper bookMapper;
+    private final CloudinaryService cloudinaryService;
 
     public List<BookDTO> getAll() {
         return bookMapper.toDTOs(bookRepository.findAll());
@@ -128,13 +129,26 @@ public class BookService {
         return bookMapper.toDTO(bookRepository.save(book));
     }
 
-    public BookDTO uploadImage(Long bookId, MultipartFile file, FileStorageService storageService) {
+//    public BookDTO uploadImage(Long bookId, MultipartFile file, FileStorageService storageService) {
+//        Book book = bookRepository.findById(bookId)
+//                .orElseThrow(() -> new RuntimeException("Book not found"));
+//        String imagePath = storageService.saveFile(file);
+//        book.setImage(imagePath);
+//        return bookMapper.toDTO(bookRepository.save(book));
+//    }
+
+    public BookDTO uploadImage(Long bookId, MultipartFile file) {
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
-        String imagePath = storageService.saveFile(file);
-        book.setImage(imagePath);
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sách"));
+
+        // Upload lên Cloudinary
+        String imageUrl = cloudinaryService.uploadFile(file, "bookshop/books");
+
+        book.setImage(imageUrl);
         return bookMapper.toDTO(bookRepository.save(book));
     }
+
+
 
 
     public List<BookDTO> getByAuthor(Long authorId) {

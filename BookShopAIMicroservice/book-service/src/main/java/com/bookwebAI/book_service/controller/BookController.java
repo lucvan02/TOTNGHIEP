@@ -62,10 +62,16 @@ public class BookController {
         return new ApiResponse<>("Thêm thể loại thành công", service.addCategories(bookId, categoryIds));
     }
 
+//    @PostMapping("/{bookId}/upload-image")
+//    public ApiResponse<BookDTO> uploadImage(@PathVariable Long bookId, @RequestParam("file") MultipartFile file) {
+//        return new ApiResponse<>("Đã tải lên hình ảnh", service.uploadImage(bookId, file, storageService));
+//    }
+
     @PostMapping("/{bookId}/upload-image")
     public ApiResponse<BookDTO> uploadImage(@PathVariable Long bookId, @RequestParam("file") MultipartFile file) {
-        return new ApiResponse<>("Đã tải lên hình ảnh", service.uploadImage(bookId, file, storageService));
+        return new ApiResponse<>("Đã tải lên hình ảnh", service.uploadImage(bookId, file));
     }
+
 
     @GetMapping("/by-author/{authorId}")
     public ResponseEntity<ApiResponse<List<BookDTO>>> getByAuthor(@PathVariable Long authorId) {
