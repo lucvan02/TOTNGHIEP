@@ -37,9 +37,19 @@ public class UserController {
         return ResponseEntity.ok(service.loginWithGoogle(req.get("code")));
     }
 
+    @PostMapping("/send-otp")
+    public ResponseEntity<ApiResponse<String>> sendOtp(@RequestParam String email) {
+        return ResponseEntity.ok(service.sendOtp(email));
+    }
+
     @PostMapping("/resend-otp")
     public ResponseEntity<ApiResponse<String>> resendOtp(@RequestParam String email) {
         return ResponseEntity.ok(service.resendOtp(email));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestParam String email, @RequestParam String newpass) {
+        return ResponseEntity.ok(service.resetPassword(email, newpass));
     }
 
     @PostMapping("/change-password")

@@ -23,6 +23,8 @@ public class User {
     private String firstname;
     private String lastname;
     private String phone;
+    //them do dai avatar
+    @Column(length = 2550)
     private String avatar;
     private String role;
 

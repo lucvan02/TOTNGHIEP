@@ -30,7 +30,7 @@ export default function Login() {
       const message1 = res.data?.message;
 
       if (message1 === "Đăng nhập thành công" && data?.token) {
-        // setToken(data.token);
+        setToken(data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         messageApi.success(message1 || "Đăng nhập thành công!");
         setTimeout(() => navigate("/"), 1000);

@@ -37,6 +37,9 @@ export const authApi = {
   login: (data) => axios.post(`${API_URL}/users/login`, data),
   googleLogin: (code) => axios.post(`${API_URL}/users/google-login`, { code }),
   getProfile: () => axios.get(`${API_URL}/users/profile`),
+  changePassword: (data) => axios.post(`${API_URL}/users/change-password`, data),
+  resendOtp: (email) => axios.post(`${API_URL}/users/resend-otp?email=${email}`),
+  sendOtp: (email) => axios.post(`${API_URL}/users/send-otp?email=${email}`),
 };
 
 export const setToken = (token) => localStorage.setItem("token", token);

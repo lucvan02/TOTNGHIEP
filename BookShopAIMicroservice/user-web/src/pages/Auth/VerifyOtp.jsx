@@ -87,20 +87,28 @@ export default function VerifyOtp() {
     try {
       const res = await authApi.verifyOtp(email, otp);
       messageApi.success(res.data.message);
-      navigate("/login");
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
     } catch {
       messageApi.error("Xác thực thất bại!");
     }
   };
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      height="100vh"
-      sx={{ backgroundColor: "#f3f6f9" }}
-    >
+    //them background image
+
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+        sx={{
+          backgroundImage: "url('/logo/login-book-bg.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
       {contextHolder}
       <Card sx={{ p: 4, width: 400 }}>
         <Typography variant="h5" textAlign="center" mb={2}>

@@ -199,10 +199,11 @@ import { orderApi } from "../../api/orderApi";                             // NE
 import { getUid } from "../../api/localStorageService";                    // NEW
 import {
   Box, Typography, CircularProgress, Card, CardMedia,
-  Divider, Button, Rating, Snackbar, Alert                            // NEW
+  Divider, Button, Rating, Snackbar, Alert
 } from "@mui/material";
 import { Tag } from "antd";
 import { ShoppingCartOutlined } from "@ant-design/icons";
+import { Favorite } from "@mui/icons-material";
 
 export default function BookDetail() {
   const { id } = useParams();
@@ -274,6 +275,10 @@ export default function BookDetail() {
     }
   };
 
+  const handleFavorite = () => {                                          // NEW
+    notify("info", "Tính năng đang phát triển");
+  }
+
   if (loading)
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
@@ -291,26 +296,34 @@ export default function BookDetail() {
 
         <Box flex={1} ml={{ md: 4 }} mt={{ xs: 3, md: 0 }}>
           <Typography variant="h4" fontWeight="bold" mb={1}>{book.title}</Typography>
-          <Typography variant="subtitle1" color="text.secondary" mb={2}>
-            {book.authors?.map((a) => a.name).join(", ")}
+
+          {/* Đánh giá sao trung bình */}
+          <Typography variant="body1" color="text.secondary" mb={2}>
+            <Rating value={book.star} readOnly precision={0.1} />
+            <span style={{ marginLeft: 8 }}>{book.star?.toFixed(1)}</span>
           </Typography>
 
-          <Typography variant="h5" color="primary" mb={2} fontWeight="bold">
-            {book.price?.toLocaleString()}₫
+          {/* //Tồn kho và đã bán */}
+          <Typography variant="subtitle1" color="text.secondary" mb={2}>
+            Đã bán: {book.saleQuantity} || Hiện có: {book.stock}
           </Typography>
 
           <Box display="flex" gap={2} mb={3}>
             <Button variant="contained" color="primary" startIcon={<ShoppingCartOutlined />} disabled={saving}
               onClick={handleAddToCart}>
-              Thêm vào giỏ hàng
+              Thêm vào giỏ
             </Button>
-            <Button variant="outlined" color="secondary" disabled={saving} onClick={handleBuyNow}>
+            {/* <Button variant="outlined" color="secondary" disabled={saving} onClick={handleBuyNow}>
               Mua ngay
+            </Button> */}
+            {/* <Button variant="outlined" color="secondary" disabled={saving} onClick={() => notify("info", "Tính năng đang phát triển")}> */}
+            <Button variant="outlined" color="secondary" disabled={saving}
+              onClick={handleFavorite}>
+              Yêu thích
             </Button>
           </Box>
 
           <Divider sx={{ my: 2 }} />
-          {/* ... phần thông tin phụ giữ nguyên ... */}
           <Box>
             <Typography variant="body1" fontWeight="bold">Thể loại:</Typography>
             {book.categories?.map((c) => (
@@ -332,7 +345,44 @@ export default function BookDetail() {
         </Box>
       </Card>
 
-      {/* ... Mô tả & đánh giá giữ nguyên ... */}
+            {/* Mô tả */}
+      <Card
+        sx={{
+          p: 3,
+          borderRadius: 3,
+          boxShadow: 2,
+          backgroundColor: "#fff",
+        }}
+      >
+        <Typography variant="h6" mb={2}>
+          📖 Mô tả
+        </Typography>
+        <Typography
+          variant="body1"
+          sx={{ whiteSpace: "pre-wrap" }}
+          dangerouslySetInnerHTML={{ __html: book.description }}
+        />
+      </Card>
+
+      {/* Khu vực đánh giá */}
+      <Card
+        sx={{
+          p: 3,
+          borderRadius: 3,
+          boxShadow: 2,
+          backgroundColor: "#fff",
+        }}
+      >
+        <Typography variant="h6" mb={2}>
+          ⭐ Đánh giá (chưa có)
+        </Typography>
+        <Box display="flex" flexDirection="column" alignItems="center">
+          <Rating value={0} readOnly size="large" />
+          <Typography mt={1} color="text.secondary">
+            Tính năng đánh giá sẽ sớm được cập nhật!
+          </Typography>
+        </Box>
+      </Card>
 
       <Snackbar open={toast.open} autoHideDuration={2000} onClose={() => setToast({ ...toast, open: false })}>
         <Alert severity={toast.type} variant="filled">{toast.msg}</Alert>

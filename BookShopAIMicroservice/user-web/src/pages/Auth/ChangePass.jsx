@@ -4,9 +4,9 @@ import { useState } from "react";
 import { authApi } from "../../api/authApi";
 import { useNavigate } from "react-router-dom";
 
-export default function ForgotPassword() {
+export default function ChangePass() {
   const [email, setEmail] = useState("");
-  // const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -14,25 +14,16 @@ export default function ForgotPassword() {
 
   const handleSubmit = async () => {
     try {
-      await authApi.sendOtp(email);
-      messageApi.success("Đã gửi mã OTP reset mật khẩu đến email");
+      await authApi.changePassword(email, newPassword);
+      messageApi.success("Đã thay đổi mật khẩu thành công");
       setTimeout(() => {
-        navigate("/verify-otp", { state: { email: email } });
+        navigate("/login");
       }, 1000);
     } catch {
-      message.error("Gửi OTP thất bại");
+      message.error("Thay đổi mật khẩu thất bại");
     }
   };
   
-
-  // const handleVerifyOtp = async () => {
-  //   try {
-  //     await authApi.verifyOtp(email, otp);
-  //     message.success("Xác nhận OTP thành công");
-  //   } catch {
-  //     message.error("Xác nhận OTP thất bại");
-  //   }
-  // };
 
   return (
     <>
@@ -50,27 +41,17 @@ export default function ForgotPassword() {
       >
         <Card sx={{ p: 4, width: 350 }}>
           <Typography variant="h6" textAlign="center" mb={2}>
-            Quên mật khẩu
+            Đổi mật khẩu
           </Typography>
           <TextField
-            label="Email"
+            label="Mật khẩu mới"
             fullWidth
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
           />
           <Button variant="contained" fullWidth sx={{ mt: 2 }} onClick={handleSubmit}>
-            Gửi OTP
+            Đổi mật khẩu
           </Button>
-
-          {/* <TextField
-            label="Mã OTP"
-            fullWidth
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-          />
-          <Button variant="contained" fullWidth sx={{ mt: 2 }} onClick={handleVerifyOtp}>
-            Xác nhận
-          </Button> */}
 
           <Button
             variant="text"

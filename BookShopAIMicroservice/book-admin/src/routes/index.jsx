@@ -8,7 +8,7 @@ import AuthorManage from "../pages/author/AuthorManage";
 import CategoryManage from "../pages/category/CategoryManage";
 import PublisherManage from "../pages/publisher/PublisherManage";
 import ReceiptManage from "../pages/recepit/ReceiptManage";
-// import OrderManage from "../pages/order/OrderManage";
+import OrderManage from "../pages/order/OrderManage";
 // import UserManage from "../pages/user/UserManage";
 // import BookList from "../pages/book/BookList";
 // import BookForm from "../pages/book/BookForm";
@@ -35,7 +35,7 @@ const AppRoutes = () => {
         <Route path="publishers" element={<PublisherManage />} />
         <Route path="receipts" element={<ReceiptManage />} />
 
-        {/* <Route path="orders" element={<OrderManage />} /> */}
+        <Route path="orders" element={<OrderManage />} />
         {/* <Route path="users" element={<UserManage />} /> */}
 
         {/* Default route */}

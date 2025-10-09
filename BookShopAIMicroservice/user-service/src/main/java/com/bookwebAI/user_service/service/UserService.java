@@ -75,6 +75,7 @@ public class UserService {
                 .phone(dto.getPhone())
                 .active(false)
                 .role("USER")
+                .provider("LOCAL")
                 .build();
         repo.save(user);
 
@@ -119,8 +120,8 @@ public class UserService {
         if (!user.isActive())
             return ApiResponse.<Map<String, Object>>builder().message("Tài khoản chưa được kích hoạt").build();
 
-        String token = jwtUtil.generateToken(user.getUsername());
-        Map<String, Object> data = Map.of("token", token, "user", user);
+        String jwtToken = jwtUtil.generateToken(user.getUid(), user.getEmail(), user.getRole());
+        Map<String, Object> data = Map.of("token", jwtToken, "user", user);
 
         return ApiResponse.<Map<String, Object>>builder()
                 .message("Đăng nhập thành công")
@@ -156,28 +157,60 @@ public class UserService {
         String userInfoUrl = "https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=" + accessToken;
         GoogleUserInfo googleUser = restTemplate.getForObject(userInfoUrl, GoogleUserInfo.class);
 
-        // Nếu user chưa tồn tại => tạo mới
-        User user = repo.findByEmail(googleUser.getEmail()).orElseGet(() -> {
-            User newUser = User.builder()
-                    .uid(UUID.randomUUID().toString())
+//        // Nếu user chưa tồn tại => tạo mới
+//        User user = repo.findByEmail(googleUser.getEmail()).orElseGet(() -> {
+//            User newUser = User.builder()
+//                    .uid(UUID.randomUUID().toString())
+//                    .email(googleUser.getEmail())
+//                    .firstname(googleUser.getGiven_name())
+//                    .lastname(googleUser.getFamily_name())
+//                    .avatar(googleUser.getPicture())
+//                    .role("USER")
+//                    .active(true)
+//                    .build();
+//            return repo.save(newUser);
+//        });
+
+        System.out.println("👤 Google user info: " + googleUser);
+
+        User user = repo.findByEmail(googleUser.getEmail()).orElse(null);
+        if (user == null) {
+            user = User.builder()
                     .email(googleUser.getEmail())
                     .firstname(googleUser.getGiven_name())
                     .lastname(googleUser.getFamily_name())
                     .avatar(googleUser.getPicture())
                     .role("USER")
                     .active(true)
+                    .provider("GOOGLE")
+                    .providerId(googleUser.getId())
                     .build();
-            return repo.save(newUser);
-        });
+        } else {
+            user.setActive(true);
+            if (!user.getProvider().contains("GOOGLE")) {
+                user.setProvider(user.getProvider() + "+GOOGLE");
+            }
+            if (user.getProviderId() == null || user.getProviderId().isEmpty()) {
+                user.setProviderId(googleUser.getId());
+            }
+            // Cập nhật ảnh và tên từ Google
+            user.setAvatar(googleUser.getPicture());
+        }
+        repo.save(user);
 
-        String jwtToken = jwtUtil.generateToken(user.getEmail());
+
+
+        String jwtToken = jwtUtil.generateToken(user.getUid(), user.getEmail(), user.getRole());
         Map<String, Object> data = Map.of("token", jwtToken, "user", user);
+        System.out.println(data);
 
         return ApiResponse.<Map<String, Object>>builder()
                 .message("Đăng nhập Google thành công")
                 .data(data)
                 .build();
     }
+
+
 
     /*--------------------------------------------------
      * Các chức năng phụ
@@ -189,6 +222,33 @@ public class UserService {
         sendMail(email, "Mã OTP mới của bạn",
                 "<p>Mã xác thực mới của bạn là: <b>" + token.getOtp() + "</b></p>");
         return ApiResponse.<String>builder().message("OTP mới đã được gửi lại").build();
+    }
+
+    public ApiResponse<String> sendOtp(String email){
+        User user = repo.findByEmail(email).orElse(null);
+        if (user == null) {
+            return ApiResponse.<String>builder().message("Email không tồn tại").build();
+        }
+//        tokenRepo.deleteByEmail(email);
+        VerificationToken token = VerificationToken.create(email);
+        tokenRepo.save(token);
+        sendMail(email, "Mã OTP thay đổi mật khẩu",
+                "<p>Mã xác thực của bạn là: <b>" + token.getOtp() + "</b></p>" +
+                        "<p>Mã có hiệu lực trong 5 phút.</p>");
+        return ApiResponse.<String>builder().message("Đã gửi mã OTP đến email của bạn").build();
+    }
+
+    //hàm đặt lại mật khẩu
+    @Transactional
+    public ApiResponse<String> resetPassword(String email, String newpassword) {
+
+
+        User user = repo.findByEmail(email).orElseThrow();
+        user.setPassword(encoder.encode(newpassword));
+        repo.save(user);
+
+
+        return ApiResponse.<String>builder().message("Đặt lại mật khẩu thành công").build();
     }
 
     @Transactional

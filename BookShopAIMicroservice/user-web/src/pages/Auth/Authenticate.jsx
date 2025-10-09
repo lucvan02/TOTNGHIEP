@@ -16,7 +16,8 @@ export default function Authenticate() {
       authApi.googleLogin(code)
         .then((res) => {
           messageApi.success("Đăng nhập Google thành công!");
-          setToken(res.data.data.accessToken);
+          setToken(res.data.data.token);
+          localStorage.setItem("user", JSON.stringify(res.data.data.user));
           navigate("/");
         })
         .catch((err) => {
