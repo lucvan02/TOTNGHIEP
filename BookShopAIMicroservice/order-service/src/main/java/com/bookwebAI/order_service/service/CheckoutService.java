@@ -200,11 +200,11 @@ public class CheckoutService {
         cart.setUpdatedAt(LocalDateTime.now());
         cart = orderRepo.save(cart);
 
-        // kho + sale
-        for (OrderItem it : cart.getItems()) {
-            bookClient.decreaseStock(it.getBookId(), it.getQuantity());
-            bookClient.increaseSale(it.getBookId(), it.getQuantity());
-        }
+//        // kho + sale
+//        for (OrderItem it : cart.getItems()) {
+//            bookClient.decreaseStock(it.getBookId(), it.getQuantity());
+//            bookClient.increaseSale(it.getBookId(), it.getQuantity());
+//        }
 
         return cart; // trả về với id (UUID) đang là mã đơn
     }

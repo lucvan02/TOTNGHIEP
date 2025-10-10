@@ -3,7 +3,7 @@ import axios from "axios";
 const BASE = "http://localhost:8080"; // API Gateway
 // axios interceptor  đã tự gắn Authorization nếu có
 
-export const OrderApi = {
+export const adminOrderApi = {
   // list all or by status
   list: (status) => axios.get(`${BASE}/api/orders`, { params: { status } }),
   // detail by orderId (UUID)

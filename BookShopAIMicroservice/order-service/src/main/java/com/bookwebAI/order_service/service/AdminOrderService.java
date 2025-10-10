@@ -1,0 +1,70 @@
+package com.bookwebAI.order_service.service;
+
+import com.bookwebAI.order_service.client.BookClient;
+import com.bookwebAI.order_service.client.UserClient;
+import com.bookwebAI.order_service.client.dto.ApiResponse;
+import com.bookwebAI.order_service.client.dto.BookDto;
+import com.bookwebAI.order_service.dto.request.UpdateStatusRequest;
+import com.bookwebAI.order_service.entity.Order;
+import com.bookwebAI.order_service.entity.OrderItem;
+import com.bookwebAI.order_service.entity.enums.OrderStatus;
+import com.bookwebAI.order_service.repository.OrderItemRepository;
+import com.bookwebAI.order_service.repository.OrderRepository;
+
+import io.github.resilience4j.core.lang.Nullable;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service @RequiredArgsConstructor
+public class AdminOrderService {
+    private final OrderRepository orderRepo;
+    private final BookClient bookClient;
+    private final UserClient userClient;     // NEW
+    private final MailService mailService;   // NEW
+
+    @Transactional
+    public Order updateStatus(String orderId, UpdateStatusRequest req) {
+        Order o = orderRepo.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+        OrderStatus next = OrderStatus.valueOf(req.getStatus().toUpperCase());
+        OrderStatus prev = o.getStatus();
+
+        // Hạn chế hủy: chỉ cho hủy khi chưa giao
+        if (next == OrderStatus.CANCELLED && (prev == OrderStatus.SHIPPED || prev == OrderStatus.COMPLETED)) {
+            throw new IllegalStateException("Không thể hủy đơn sau khi đã giao.");
+        }
+
+        // Chuyển trạng thái
+        o.setStatus(next);
+        if (next == OrderStatus.CANCELLED) {
+            o.setCancelReason(req.getCancelReason());
+        }
+        o.setUpdatedAt(LocalDateTime.now());
+        o = orderRepo.save(o);
+
+        // Hành động theo trạng thái
+        if (next == OrderStatus.SHIPPED) {
+            // TRỪ KHO tại đây
+            for (OrderItem it : o.getItems()) {
+                bookClient.decreaseStock(it.getBookId(), it.getQuantity());
+            }
+        } else if (next == OrderStatus.COMPLETED) {
+            // TĂNG SALE khi hoàn tất
+            for (OrderItem it : o.getItems()) {
+                bookClient.increaseSale(it.getBookId(), it.getQuantity());
+            }
+        } else if (next == OrderStatus.CANCELLED) {
+            // GỬI EMAIL thông báo hủy
+//            var user = userClient.getContact(o.getBuyerId()).getData(); // {email, fullName}
+            var user = userClient.getContact(o.getBuyerId()); // {email, fullName}
+            mailService.sendOrderCancelled(user.getEmail(), user.getFullName(), o.getId(), req.getCancelReason());
+            //in ra console
+            System.out.println("Gửi email hủy đơn tới " + user.getEmail());
+        }
+
+        return o;
+    }
+}

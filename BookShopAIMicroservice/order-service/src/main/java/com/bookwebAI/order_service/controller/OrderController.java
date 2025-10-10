@@ -5,6 +5,7 @@ import com.bookwebAI.order_service.dto.request.UpdateStatusRequest;
 import com.bookwebAI.order_service.entity.Order;
 import com.bookwebAI.order_service.dto.request.CheckoutRequest;
 import com.bookwebAI.order_service.repository.OrderRepository;
+import com.bookwebAI.order_service.service.AdminOrderService;
 import com.bookwebAI.order_service.service.CheckoutService;
 import com.bookwebAI.order_service.service.OrderService;
 import jakarta.validation.Valid;
@@ -88,6 +89,8 @@ public class OrderController {
     private final OrderRepository orderRepo;
     private final OrderService adminOrderService;
 
+    private final AdminOrderService adminOrderService1;
+
     @PostMapping("/{buyerId}/checkout")
     public ApiResponse<Order> checkout(@PathVariable String buyerId, @RequestBody @Valid CheckoutRequest req) {
         return new ApiResponse<>("Đặt hàng thành công", checkoutService.checkout(buyerId, req));
@@ -115,9 +118,14 @@ public class OrderController {
         return new ApiResponse<>("Chi tiết đơn", adminOrderService.get(orderId));
     }
 
+//    @PutMapping("/{orderId}/status")
+//    public ApiResponse<Order> updateStatus(@PathVariable String orderId, @RequestBody @Valid UpdateStatusRequest req) {
+//        return new ApiResponse<>("Cập nhật trạng thái", adminOrderService.updateStatus(orderId, req));
+//    }
+
     @PutMapping("/{orderId}/status")
     public ApiResponse<Order> updateStatus(@PathVariable String orderId, @RequestBody @Valid UpdateStatusRequest req) {
-        return new ApiResponse<>("Cập nhật trạng thái", adminOrderService.updateStatus(orderId, req));
+        return new ApiResponse<>("Cập nhật trạng thái", adminOrderService1.updateStatus(orderId, req));
     }
 
     @PutMapping("/{orderId}/payment")

@@ -63,4 +63,16 @@ public class UserController {
     public ResponseEntity<ApiResponse<User>> getProfile(@RequestParam String username) {
         return ResponseEntity.ok(service.getProfile(username));
     }
+
+//    @PutMapping("/profile")
+//    public ResponseEntity<ApiResponse<UserResponseDto>> updateProfile(@RequestParam String username, @RequestBody UserUpdateDto dto) {
+//        return ResponseEntity.ok(service.updateProfile(username, dto));
+//    }
+
+    //lay theo uid
+    @GetMapping("/{uid}/contact")
+    public Map<String,String> getContact(@PathVariable String uid) {
+        var u = service.findByUid(uid); // bạn đã có hoặc viết nhanh repo theo uid
+        return Map.of("email", u.getEmail(), "fullName", u.getFirstname() + " " + u.getLastname());
+    }
 }

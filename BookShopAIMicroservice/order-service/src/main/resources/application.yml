@@ -15,6 +15,15 @@ spring:
     properties:
       hibernate.format_sql: true
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: n20dccn037@student.ptithcm.edu.vn
+    password: wuqy wehr waja tghu
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
 eureka:
   client:
     serviceUrl:

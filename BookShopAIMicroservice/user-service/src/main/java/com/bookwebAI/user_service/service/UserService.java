@@ -267,4 +267,9 @@ public class UserService {
                 .data(repo.findByUsername(username).orElse(null))
                 .build();
     }
+
+    //hàm tìm user theo uid
+    public User findByUid(String uid) {
+        return repo.findByUid(uid).orElseThrow(() -> new RuntimeException("User not found"));
+    }
 }
