@@ -18,8 +18,8 @@ export default function Cart() {
 
   const [form, setForm] = useState({
     receiveName: `${user?.firstname || ""} ${user?.lastname || ""}`.trim(),
-    receivePhone: user?.phone || "0900000000",
-    receiveAddress: user?.address || "12 Nguyễn Huệ, Q1, HCM",
+    receivePhone: user?.phone || "0359490251",
+    receiveAddress: user?.address || "97 Man Thiện, Tăng Nhơn Phú A, Thủ Đức,HCM",
     shippingFee: 15000,
     note: "Giao giờ hành chính",
     paymentMethod: "COD", // 👈 có thể đổi sang ONLINE

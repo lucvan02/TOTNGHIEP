@@ -37,7 +37,11 @@ public interface OrderRepository extends JpaRepository<Order, String> { // ⬅ S
     @Query("select o from Order o where o.buyerId = :buyerId and o.status <> 'CART' order by o.createdAt desc")
     List<Order> historyOf(@Param("buyerId") String buyerId);
 
+    // Lấy tất cả đơn hàng theo trạng thái, sắp xếp mới nhất -> cũ nhất, không tính trạng thái CART
+    @Query("select o from Order o where o.status <> 'CART' and o.status = :status order by o.createdAt desc")
     List<Order> findByStatusOrderByCreatedAtDesc(OrderStatus status);
 
+    // Lấy tất cả đơn hàng, sắp xếp mới nhất -> cũ nhất, không tính trạng thái CART
+    @Query("select o from Order o where o.status <> 'CART' order by o.createdAt desc")
     List<Order> findAllByOrderByCreatedAtDesc();
 }
