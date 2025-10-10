@@ -69,10 +69,21 @@ public class UserController {
 //        return ResponseEntity.ok(service.updateProfile(username, dto));
 //    }
 
-    //lay theo uid
+//    //lay theo uid cho gui mail ly do huy
+//    @GetMapping("/{uid}/contact")
+//    public Map<String,String> getContact(@PathVariable String uid) {
+//        var u = service.findByUid(uid); // bạn đã có hoặc viết nhanh repo theo uid
+//        return Map.of("email", u.getEmail(), "fullName", u.getFirstname() + " " + u.getLastname());
+//    }
+
+    //cho commennt
     @GetMapping("/{uid}/contact")
     public Map<String,String> getContact(@PathVariable String uid) {
-        var u = service.findByUid(uid); // bạn đã có hoặc viết nhanh repo theo uid
-        return Map.of("email", u.getEmail(), "fullName", u.getFirstname() + " " + u.getLastname());
+        var u = service.findByUid(uid);
+        return Map.of(
+                "email", u.getEmail(),
+                "fullName", (u.getFirstname() + " " + u.getLastname()).trim(),
+                "avatar", u.getAvatar() == null ? "" : u.getAvatar()
+        );
     }
 }

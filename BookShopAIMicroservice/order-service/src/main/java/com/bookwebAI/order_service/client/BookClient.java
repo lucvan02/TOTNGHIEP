@@ -2,6 +2,7 @@ package com.bookwebAI.order_service.client;
 
 import com.bookwebAI.order_service.client.dto.ApiResponse;
 import com.bookwebAI.order_service.client.dto.BookDto;
+import com.bookwebAI.order_service.client.dto.RatingUpdateDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,4 +18,8 @@ public interface BookClient {
 
     @PostMapping("/api/books/{id}/increaseSale")
     void increaseSale(@PathVariable("id") Long id, @RequestParam("qty") Integer qty);
+
+    @PutMapping("/api/books/{bookId}/rating-update")
+    ApiResponse<Void> updateRating(@PathVariable("bookId") Long bookId,
+                                   @RequestBody RatingUpdateDto dto);
 }

@@ -50,5 +50,8 @@ public class OrderItem {
     private Integer price;
     private Integer quantity;
     private Integer total;
+
+    //cho kiểu tynyint(1)
+    @Column(columnDefinition = "TINYINT(1) DEFAULT 0")
     private Boolean hasReview;
 }

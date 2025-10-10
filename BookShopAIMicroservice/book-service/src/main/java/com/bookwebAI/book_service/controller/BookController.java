@@ -1,6 +1,7 @@
 package com.bookwebAI.book_service.controller;
 
 import com.bookwebAI.book_service.dto.BookDTO;
+import com.bookwebAI.book_service.dto.RatingUpdateDto;
 import com.bookwebAI.book_service.dto.response.ApiResponse;
 //import com.bookwebAI.book_service.exception.GlobalExceptionHandler;
 import com.bookwebAI.book_service.service.BookService;
@@ -110,6 +111,12 @@ public class BookController {
     @PostMapping("/{id}/increaseSale")
     public void increaseSale(@PathVariable("id") Long id, @RequestParam("qty") Integer qty) {
         service.increaseSale(id, qty);
+    }
+
+    @PutMapping("/{bookId}/rating-update")
+    public ApiResponse<String> updateRating(@PathVariable Long bookId, @RequestBody RatingUpdateDto dto) {
+        service.updateRating(bookId, dto.getAverage(), dto.getCount());
+        return new ApiResponse<>("OK", "updated");
     }
 
 

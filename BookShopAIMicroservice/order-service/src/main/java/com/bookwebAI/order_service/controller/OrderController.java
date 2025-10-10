@@ -4,6 +4,7 @@ import com.bookwebAI.order_service.client.dto.ApiResponse;
 import com.bookwebAI.order_service.dto.request.UpdateStatusRequest;
 import com.bookwebAI.order_service.entity.Order;
 import com.bookwebAI.order_service.dto.request.CheckoutRequest;
+import com.bookwebAI.order_service.entity.enums.OrderStatus;
 import com.bookwebAI.order_service.repository.OrderRepository;
 import com.bookwebAI.order_service.service.AdminOrderService;
 import com.bookwebAI.order_service.service.CheckoutService;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 //@RestController
@@ -131,5 +133,30 @@ public class OrderController {
     @PutMapping("/{orderId}/payment")
     public ApiResponse<Order> setPayment(@PathVariable String orderId, @RequestParam boolean paid) {
         return new ApiResponse<>("Cập nhật trạng thái thanh toán", adminOrderService.setPaymentStatus(orderId, paid));
+    }
+
+    @PostMapping("/{buyerId}/{orderId}/cancel")
+    public ApiResponse<Order> cancelByBuyer(
+            @PathVariable String buyerId,
+            @PathVariable String orderId,
+            @RequestBody Map<String, String> body
+    ) {
+        Order o = orderRepo.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (!o.getBuyerId().equals(buyerId)) {
+            throw new RuntimeException("Bạn không có quyền hủy đơn này");
+        }
+        if (o.getStatus() != OrderStatus.PENDING) {
+            throw new RuntimeException("Chỉ hủy khi đơn đang PENDING");
+        }
+
+        // Tái sử dụng service admin để đảm bảo gửi email + lưu lý do
+        UpdateStatusRequest req = new UpdateStatusRequest();
+        req.setStatus("CANCELLED");
+        req.setCancelReason(body.getOrDefault("reason", "Khách yêu cầu hủy"));
+
+        Order updated = adminOrderService.updateStatus(orderId, req);
+        return new ApiResponse<>("Đã hủy đơn", updated);
     }
 }

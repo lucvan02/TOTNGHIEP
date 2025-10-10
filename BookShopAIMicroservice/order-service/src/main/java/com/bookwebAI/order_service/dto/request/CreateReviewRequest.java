@@ -9,6 +9,6 @@ import lombok.Data;
 @Data
 public class CreateReviewRequest {
     @NotNull private Long orderItemId;
-    @Min(1) @Max(5) private Integer star;
+    @Min(1) @Max(5) private Integer stars;
     private String comment;
 }

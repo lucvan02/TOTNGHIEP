@@ -11,6 +11,7 @@ import Authenticate from "../pages/Auth/Authenticate";
 import Cart from "../pages/Cart/Cart";
 import MainLayout from "../layouts/MainLayout";
 import OrderHistory from "../pages/Orders/OrderHistory";
+import OrderDetail from "../pages/Orders/OrderDetail";
 
 export default function AppRouter() {
   return (
@@ -31,6 +32,7 @@ export default function AppRouter() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/orders" element={<OrderHistory />} />
+          <Route path="/orders/:id" element={<OrderDetail />} />
         </Route>
 
         <Route path="*" element={<h2>404 Not Found</h2>} />

@@ -56,6 +56,8 @@ public class AdminOrderService {
             for (OrderItem it : o.getItems()) {
                 bookClient.increaseSale(it.getBookId(), it.getQuantity());
             }
+            //Chuyển trạng thái đã thanh toán
+            o.setPaymentStatus(true);
         } else if (next == OrderStatus.CANCELLED) {
             // GỬI EMAIL thông báo hủy
 //            var user = userClient.getContact(o.getBuyerId()).getData(); // {email, fullName}

@@ -187,4 +187,12 @@ public class BookService {
         bookRepository.save(book);
     }
 
+    @Transactional
+    public void updateRating(Long bookId, Double newAvg, Long newCount) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+        book.setStar(newAvg.floatValue());
+        bookRepository.save(book);
+    }
+
 }
