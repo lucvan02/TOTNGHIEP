@@ -325,14 +325,14 @@ export default function BookDetail() {
           <Box>
             <Typography variant="body1" fontWeight="bold">Thể loại:</Typography>
             {book.categories?.map((c) => (
-              <Tag color="geekblue" key={c.id} style={{ marginTop: 5 }}>{c.name}</Tag>
+              <Tag color="geekblue" key={c.id} style={{ marginTop: 5 }} onClick={() => navigate(`/category/${c.id}`)}>{c.name}</Tag>
             ))}
           </Box>
 
           <Box>
             <Typography variant="body1" fontWeight="bold">Tác giả:</Typography>
             {book.authors?.map((a) => (
-              <Tag color="purple" key={a.id} style={{ marginTop: 5 }}>{a.name}</Tag>
+              <Tag color="purple" key={a.id} style={{ marginTop: 5 }} onClick={() => navigate(`/author/${a.id}`)}>{a.name}</Tag>
             ))}
           </Box>
 

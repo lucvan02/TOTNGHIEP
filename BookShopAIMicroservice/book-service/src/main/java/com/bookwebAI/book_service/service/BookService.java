@@ -12,9 +12,13 @@ import com.bookwebAI.book_service.repository.CategoryRepository;
 import com.bookwebAI.book_service.repository.PublisherRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.CellStyle;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+
 
 import java.util.HashSet;
 import java.util.List;
@@ -149,16 +153,27 @@ public class BookService {
     }
 
 
+//    public List<BookDTO> getByAuthor(Long authorId) {
+//        return bookMapper.toDTOList(bookRepository.findByAuthorId(authorId));
+//    }
+//
+//
+//    public List<BookDTO> getByCategory(Long categoryId) {
+//        return bookMapper.toDTOList(bookRepository.findByCategoryId(categoryId));
+//    }
 
-
-    public List<BookDTO> getByAuthor(Long authorId) {
-        return bookMapper.toDTOList(bookRepository.findByAuthorId(authorId));
+    public Page<BookDTO> getByAuthor(Long authorId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Book> bookPage = bookRepository.findByAuthors_Id(authorId, pageable);
+        return bookPage.map(bookMapper::toDTO);
     }
 
-
-    public List<BookDTO> getByCategory(Long categoryId) {
-        return bookMapper.toDTOList(bookRepository.findByCategoryId(categoryId));
+    public Page<BookDTO> getByCategory(Long categoryId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Book> bookPage = bookRepository.findByCategories_Id(categoryId, pageable);
+        return bookPage.map(bookMapper::toDTO);
     }
+
 
 
     public List<BookDTO> getTopSale() {

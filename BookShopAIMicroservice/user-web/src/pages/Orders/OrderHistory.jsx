@@ -66,8 +66,8 @@ export default function OrderHistory() {
   };
 
   // Cancel
-  const openCancel = (order) => setCancelDlg({ open: true, order, reasonType: "OTHER", other: "Khách yêu cầu hủy" });
-  const closeCancel = () => setCancelDlg({ open: false, order: null, reasonType: "OTHER", other: "Khách yêu cầu hủy" });
+  const openCancel = (order) => setCancelDlg({ open: true, order, reasonType: "OTHER", other: "Không muốn nói" });
+  const closeCancel = () => setCancelDlg({ open: false, order: null, reasonType: "OTHER", other: "Không muốn nói" });
   const doCancel = async () => {
     const { order, reasonType, other } = cancelDlg;
     const map = {
@@ -106,7 +106,7 @@ export default function OrderHistory() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Mã đơn (UUID)</TableCell>
+                <TableCell>Mã đơn</TableCell>
                 <TableCell>Trạng thái</TableCell>
                 <TableCell>Thanh toán</TableCell>
                 <TableCell>Phương thức</TableCell>
@@ -126,7 +126,7 @@ export default function OrderHistory() {
                   <TableCell>{fmtDate(o.createdAt)}</TableCell>
                   <TableCell align="right">
                     <Button size="small" variant="contained" onClick={()=> nav(`/orders/${o.id}`)}>Xem</Button>
-                    <Button size="small" sx={{ml:1}} variant="outlined" onClick={()=> openDetailQuick(o)}>Xem nhanh</Button>
+                    {/* <Button size="small" sx={{ml:1}} variant="outlined" onClick={()=> openDetailQuick(o)}>Xem nhanh</Button> */}
                     {o.status === "PENDING" && (
                       <Button size="small" color="error" sx={{ml:1}} onClick={()=> openCancel(o)}>
                         Hủy đơn
@@ -242,8 +242,8 @@ export default function OrderHistory() {
           onChange={(e)=> setCancelDlg(s=>({...s, reasonType: e.target.value}))}
         >
           <Space direction="vertical">
-            <Radio value="OUT_OF_STOCK">Hết hàng</Radio>
-            <Radio value="INVALID_INFO">Thông tin không hợp lệ</Radio>
+            <Radio value="OUT_OF_STOCK">Chỉnh sửa thông tin nhận</Radio>
+            <Radio value="INVALID_INFO">Đổi ý không muốn mua nữa</Radio>
             <Radio value="OTHER">Lý do khác</Radio>
           </Space>
         </Radio.Group>

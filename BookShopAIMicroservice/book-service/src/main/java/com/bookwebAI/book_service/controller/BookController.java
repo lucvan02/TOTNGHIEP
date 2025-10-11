@@ -7,6 +7,7 @@ import com.bookwebAI.book_service.dto.response.ApiResponse;
 import com.bookwebAI.book_service.service.BookService;
 import com.bookwebAI.book_service.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -74,16 +75,37 @@ public class BookController {
     }
 
 
-    @GetMapping("/by-author/{authorId}")
-    public ResponseEntity<ApiResponse<List<BookDTO>>> getByAuthor(@PathVariable Long authorId) {
-        return ResponseEntity.ok(new ApiResponse<>("Lấy sách theo tác giả thành công", service.getByAuthor(authorId)));
-    }
+//    @GetMapping("/by-author/{authorId}")
+//    public ResponseEntity<ApiResponse<List<BookDTO>>> getByAuthor(@PathVariable Long authorId) {
+//        return ResponseEntity.ok(new ApiResponse<>("Lấy sách theo tác giả thành công", service.getByAuthor(authorId)));
+//    }
+//
+//
+//    @GetMapping("/by-category/{categoryId}")
+//    public ResponseEntity<ApiResponse<List<BookDTO>>> getByCategory(@PathVariable Long categoryId) {
+//        return ResponseEntity.ok(new ApiResponse<>("Lấy sách theo thể loại thành công", service.getByCategory(categoryId)));
+//    }
 
+    @GetMapping("/by-author/{authorId}")
+    public ResponseEntity<ApiResponse<Page<BookDTO>>> getByAuthor(
+            @PathVariable Long authorId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+        return ResponseEntity.ok(
+                new ApiResponse<>("Lấy sách theo tác giả thành công", service.getByAuthor(authorId, page, size))
+        );
+    }
 
     @GetMapping("/by-category/{categoryId}")
-    public ResponseEntity<ApiResponse<List<BookDTO>>> getByCategory(@PathVariable Long categoryId) {
-        return ResponseEntity.ok(new ApiResponse<>("Lấy sách theo thể loại thành công", service.getByCategory(categoryId)));
+    public ResponseEntity<ApiResponse<Page<BookDTO>>> getByCategory(
+            @PathVariable Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+        return ResponseEntity.ok(
+                new ApiResponse<>("Lấy sách theo thể loại thành công", service.getByCategory(categoryId, page, size))
+        );
     }
+
 
     // Top bán chạy
     @GetMapping("/top-sale")

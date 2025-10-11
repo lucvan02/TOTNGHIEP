@@ -1,16 +1,25 @@
 package com.bookwebAI.book_service.repository;
 
 import com.bookwebAI.book_service.entity.Book;
-import feign.Param;
+//import feign.Param;
+import org.springframework.data.repository.query.Param;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
     List<Book> findByTitleContainingIgnoreCase(String keyword);
-    List<Book> findByCategories_Id(Long categoryId);
-    List<Book> findByAuthors_Id(Long authorId);
+//    List<Book> findByCategories_Id(Long categoryId);
+//    List<Book> findByAuthors_Id(Long authorId);
+
+    Page<Book> findByAuthors_Id(Long authorId, Pageable pageable);
+    Page<Book> findByCategories_Id(Long categoryId, Pageable pageable);
+
     @Query("SELECT b FROM Book b JOIN b.authors a WHERE a.id = :authorId")
     List<Book> findByAuthorId(@Param("authorId") Long authorId);
 
