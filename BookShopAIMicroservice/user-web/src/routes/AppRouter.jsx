@@ -14,7 +14,7 @@ import OrderHistory from "../pages/Orders/OrderHistory";
 import OrderDetail from "../pages/Orders/OrderDetail";
 import CategoryBooks from "../pages/CategoryBooks/CategoryBooks";
 import AuthorBooks from "../pages/AuthorBooks/AuthorBooks";
-// import SearchResults from "../pages/SearchResults/SearchResults";
+import FavoriteList from "../pages/Favorite/FavoriteList";
 
 export default function AppRouter() {
   return (
@@ -39,7 +39,8 @@ export default function AppRouter() {
 
           <Route path="/category/:id" element={<CategoryBooks />} />
           <Route path="/author/:id" element={<AuthorBooks />} />
-          {/* <Route path="/search" element={<SearchResults />} /> */}
+          <Route path="/favorites" element={<FavoriteList />} />
+
         </Route>
 
         <Route path="*" element={<h2>404 Not Found</h2>} />

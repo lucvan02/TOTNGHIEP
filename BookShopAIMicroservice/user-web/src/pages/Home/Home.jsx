@@ -216,12 +216,12 @@ export default function Home() {
     fetchBooks();
   }, []);
 
-  if (loading)
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-        <CircularProgress />
-      </Box>
-    );
+  // if (loading)
+  //   return (
+  //     <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+  //       <CircularProgress />
+  //     </Box>
+  //   );
 
   // ✅ Ảnh banner (demo)
   const banners = [

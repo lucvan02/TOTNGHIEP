@@ -108,6 +108,7 @@ export default function Header() {
     >
       <MenuItem onClick={() => navigate("/profile")}>Thông tin cá nhân</MenuItem>
       <MenuItem onClick={() => navigate("/orders")}>Lịch sử mua hàng</MenuItem>
+      <MenuItem onClick={() => navigate("/favorites")}>Sách yêu thích</MenuItem>
       <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
     </Menu>
   );

@@ -70,9 +70,9 @@ const Sidebar = () => {
         </Menu.Item>
 
         {/* Quản lý người dùng */}
-        <Menu.Item key="/users" icon={<UserOutlined />}>
+        {/* <Menu.Item key="/users" icon={<UserOutlined />}>
           <Link to="/users">Quản lý người dùng</Link>
-        </Menu.Item>
+        </Menu.Item> */}
 
         {/* Đăng xuất */}
         <Menu.Item key="/logout" icon={<LogoutOutlined />}>
