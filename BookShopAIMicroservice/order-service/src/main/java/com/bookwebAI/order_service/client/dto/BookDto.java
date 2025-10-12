@@ -12,4 +12,5 @@ public class BookDto {
     private Integer stock;
     private Float star;
     private Integer saleQuantity;
+    private Integer status;
 }

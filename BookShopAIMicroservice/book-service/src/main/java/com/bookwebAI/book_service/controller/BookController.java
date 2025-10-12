@@ -28,6 +28,11 @@ public class BookController {
         return new ApiResponse<>("Lấy thông tin toàn bộ sách thành công", service.getAll());
     }
 
+    @GetMapping("/get-all-not-hidden")
+    public ApiResponse<List<BookDTO>> getAllNotHidden() {
+        return new ApiResponse<>("Lấy thông tin toàn bộ sách không ẩn thành công", service.getAllNotHidden());
+    }
+
     @GetMapping("/{id}")
     public ApiResponse<BookDTO> getById(@PathVariable Long id) {
         return new ApiResponse<>("Lấy toông tin sách thành công", service.getById(id));

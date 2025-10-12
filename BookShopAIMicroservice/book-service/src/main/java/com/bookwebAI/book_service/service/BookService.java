@@ -40,6 +40,11 @@ public class BookService {
         return bookMapper.toDTOs(bookRepository.findAll());
     }
 
+    //lay sach co trang thai =khac 0 (khong an va ngung ban)
+    public List<BookDTO> getAllNotHidden() {
+        return bookMapper.toDTOs(bookRepository.findByStatusNot(0));
+    }
+
     public BookDTO getById(Long id) {
         return bookRepository.findById(id)
                 .map(bookMapper::toDTO)

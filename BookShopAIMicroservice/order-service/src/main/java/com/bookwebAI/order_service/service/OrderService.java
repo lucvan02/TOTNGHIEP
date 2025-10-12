@@ -18,38 +18,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
-//@Service @RequiredArgsConstructor
-//public class OrderService {
-//    private final OrderRepository orderRepo;
-//
-//    @Transactional
-//    public List<Order> listAll(@Nullable String status) {
-//        if (status == null || status.isBlank()) return orderRepo.findAllByOrderByCreatedAtDesc();
-//        return orderRepo.findByStatusOrderByCreatedAtDesc(OrderStatus.valueOf(status.toUpperCase()));
-//    }
-//
-//    @Transactional
-//    public Order getByCode(String code) {
-//        return orderRepo.findByCode(code).orElseThrow(() -> new RuntimeException("Order not found"));
-//    }
-//
-//    @Transactional
-//    public Order updateStatus(String code, UpdateStatusRequest req) {
-//        Order o = getByCode(code);
-//        OrderStatus s = OrderStatus.valueOf(req.getStatus().toUpperCase());
-//
-//        // một vài luật đơn giản:
-//        if (s == OrderStatus.CANCELLED) {
-//            o.setCancelReason(req.getCancelReason());
-//        }
-//        // tuỳ nghiệp vụ: chỉ PAID khi trước đó là PENDING/CONFIRMED
-//        o.setStatus(s);
-//        o.setUpdatedAt(LocalDateTime.now());
-//        return orderRepo.save(o);
-//    }
-//}
-
-
 
 @Service @RequiredArgsConstructor
 public class OrderService {

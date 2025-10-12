@@ -28,4 +28,10 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     @Query("SELECT b FROM Book b ORDER BY b.saleQuantity DESC LIMIT 10")
     List<Book> findTopBySaleQuantity();
+
+    //Sachs co trang thai = 1 (Hien thi)
+    List<Book> findByStatus(Integer status);
+
+    //Sachs co trang thai khac 0(sách không ẩn và sách ngưng bán)
+    List<Book> findByStatusNot(Integer status);
 }

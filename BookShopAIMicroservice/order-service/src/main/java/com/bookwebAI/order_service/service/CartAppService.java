@@ -1,26 +1,22 @@
-package com.bookwebAI.order_service.service;
-
-import com.bookwebAI.order_service.client.BookClient;
-import com.bookwebAI.order_service.client.dto.ApiResponse;
-import com.bookwebAI.order_service.client.dto.BookDto;
-import com.bookwebAI.order_service.dto.request.AddToCartRequest;
-import com.bookwebAI.order_service.dto.request.UpdateCartItemRequest;
-import com.bookwebAI.order_service.entity.Order;
-import com.bookwebAI.order_service.entity.OrderItem;
-import com.bookwebAI.order_service.entity.enums.OrderStatus;
-import com.bookwebAI.order_service.repository.OrderItemRepository;
-import com.bookwebAI.order_service.repository.OrderRepository;
-import com.bookwebAI.order_service.dto.request.CheckoutRequest;
-import com.bookwebAI.order_service.util.CodeGenerator;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
-
-import java.time.LocalDateTime;
-import java.util.Optional;
-
+//package com.bookwebAI.order_service.service;
+//
+//import com.bookwebAI.order_service.client.BookClient;
+//import com.bookwebAI.order_service.client.dto.ApiResponse;
+//import com.bookwebAI.order_service.client.dto.BookDto;
+//import com.bookwebAI.order_service.dto.request.AddToCartRequest;
+//import com.bookwebAI.order_service.dto.request.UpdateCartItemRequest;
+//import com.bookwebAI.order_service.entity.Order;
+//import com.bookwebAI.order_service.entity.OrderItem;
+//import com.bookwebAI.order_service.entity.enums.OrderStatus;
+//import com.bookwebAI.order_service.repository.OrderItemRepository;
+//import com.bookwebAI.order_service.repository.OrderRepository;
+//import jakarta.transaction.Transactional;
+//import lombok.RequiredArgsConstructor;
+//import org.springframework.stereotype.Service;
+//import java.time.LocalDateTime;
+//import java.util.Optional;
+//
+//
 //@Service @RequiredArgsConstructor
 //public class CartAppService {
 //    private final OrderRepository orderRepo;
@@ -29,95 +25,21 @@ import java.util.Optional;
 //
 //    @Transactional
 //    public Order addToCart(String buyerId, AddToCartRequest req) {
-//        // 1) Lấy (hoặc tạo) đơn CART
 //        Order cart = orderRepo.findByBuyerIdAndStatus(buyerId, OrderStatus.CART)
 //                .orElseGet(() -> orderRepo.save(Order.builder()
 //                        .buyerId(buyerId)
 //                        .status(OrderStatus.CART)
+//                        .paymentStatus(false) // ⬅ thêm
 //                        .createdAt(LocalDateTime.now())
 //                        .updatedAt(LocalDateTime.now())
 //                        .build()));
 //
-//        // 2) Lấy book (để lấy giá/ảnh/tên & check stock)
-//        ApiResponse<BookDto> res = bookClient.getBook(req.getBookId());
-//        BookDto b = res.getData();
-//        if (b == null) {
-//            throw new IllegalStateException("Không tìm thấy sách id=" + req.getBookId());
-//        }
-//        Integer stock = b.getStock();
-//        if (stock == null || stock < req.getQuantity()) {
-//            throw new IllegalArgumentException("Số lượng vượt tồn kho");
-//        }
-//        // 3) Merge item
-//        Optional<OrderItem> existed = cart.getItems().stream()
-//                .filter(i -> i.getBookId().equals(req.getBookId()))
-//                .findFirst();
-//
-//        if (existed.isPresent()) {
-//            OrderItem it = existed.get();
-//            it.setQuantity(it.getQuantity() + req.getQuantity());
-//            it.setPrice(b.getPrice()); // snapshot lại giá mới nhất nếu muốn
-//            it.setTotal(it.getPrice() * it.getQuantity());
-//            itemRepo.save(it);
-//        } else {
-//            OrderItem it = OrderItem.builder()
-//                    .order(cart)
-//                    .bookId(b.getId())
-//                    .bookTitle(b.getTitle())
-//                    .bookImage(b.getImage())
-//                    .price(b.getPrice())
-//                    .quantity(req.getQuantity())
-//                    .total(b.getPrice() * req.getQuantity())
-//                    .hasReview(false)
-//                    .build();
-//            cart.getItems().add(it);
-//        }
-//
-//        cart.setUpdatedAt(LocalDateTime.now());
-//        return orderRepo.save(cart);
-//    }
-//
-////    @Transactional(readOnly = true)
-//    @Transactional
-//    public Order getCart(String buyerId) {
-//        return orderRepo.findByBuyerIdAndStatus(buyerId, OrderStatus.CART).orElse(null);
-//    }
-//
-//    @Transactional
-//    public void removeItem(String buyerId, Long bookId) {
-//        Order cart = orderRepo.findByBuyerIdAndStatus(buyerId, OrderStatus.CART)
-//                .orElseThrow(() -> new RuntimeException("Cart not found"));
-//        cart.getItems().removeIf(i -> i.getBookId().equals(bookId));
-//        cart.setUpdatedAt(LocalDateTime.now());
-//        orderRepo.save(cart);
-//    }
-//}
-
-
-
-
-
-//@Service @RequiredArgsConstructor
-//public class CartAppService {
-//    private final OrderRepository orderRepo;
-//    private final OrderItemRepository itemRepo;
-//    private final BookClient bookClient;
-//
-//    @Transactional
-//    public Order addToCart(String buyerId, AddToCartRequest req) {
-//        Order cart = orderRepo.findByBuyerIdAndStatus(buyerId, OrderStatus.CART)
-//                .orElseGet(() -> orderRepo.save(Order.builder()
-//                        .buyerId(buyerId).status(OrderStatus.CART)
-//                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build()));
-//
-//        // gọi book-service
 //        ApiResponse<BookDto> res = bookClient.getBook(req.getBookId());
 //        BookDto b = res.getData();
 //        if (b == null) throw new RuntimeException("Không tìm thấy sách");
 //        if (b.getStock() == null || b.getStock() < req.getQuantity())
 //            throw new IllegalArgumentException("Số lượng vượt tồn kho");
 //
-//        // merge
 //        Optional<OrderItem> existed = cart.getItems().stream()
 //                .filter(i -> i.getBookId().equals(req.getBookId())).findFirst();
 //
@@ -129,13 +51,17 @@ import java.util.Optional;
 //            itemRepo.save(it);
 //        } else {
 //            cart.getItems().add(OrderItem.builder()
-//                    .order(cart).bookId(b.getId()).bookTitle(b.getTitle())
-//                    .bookImage(b.getImage()).price(b.getPrice())
-//                    .quantity(req.getQuantity()).total(b.getPrice()*req.getQuantity())
-//                    .hasReview(false).build());
+//                    .order(cart)
+//                    .bookId(b.getId())
+//                    .bookTitle(b.getTitle())
+//                    .bookImage(b.getImage())
+//                    .price(b.getPrice())
+//                    .quantity(req.getQuantity())
+//                    .total(b.getPrice() * req.getQuantity())
+//                    .hasReview(false)
+//                    .build());
 //        }
 //
-//        // tổng tạm của giỏ (chưa có ship)
 //        cart.setTotal(cart.getItems().stream().map(i -> i.getTotal()==null?0:i.getTotal()).reduce(0, Integer::sum));
 //        cart.setUpdatedAt(LocalDateTime.now());
 //        return orderRepo.save(cart);
@@ -151,11 +77,9 @@ import java.util.Optional;
 //        Order cart = orderRepo.findByBuyerIdAndStatus(buyerId, OrderStatus.CART)
 //                .orElseThrow(() -> new RuntimeException("Cart not found"));
 //
-//        // nếu =0 → remove
 //        if (req.getQuantity() != null && req.getQuantity() == 0) {
 //            cart.getItems().removeIf(i -> i.getBookId().equals(req.getBookId()));
 //        } else {
-//            // check stock khi set qty
 //            ApiResponse<BookDto> res = bookClient.getBook(req.getBookId());
 //            BookDto b = res.getData();
 //            if (b == null) throw new RuntimeException("Không tìm thấy sách");
@@ -192,61 +116,153 @@ import java.util.Optional;
 
 
 
+package com.bookwebAI.order_service.service;
 
+import com.bookwebAI.order_service.client.BookClient;
+import com.bookwebAI.order_service.client.dto.ApiResponse;
+import com.bookwebAI.order_service.client.dto.BookDto;
+import com.bookwebAI.order_service.dto.request.AddToCartRequest;
+import com.bookwebAI.order_service.dto.request.UpdateCartItemRequest;
+import com.bookwebAI.order_service.entity.Order;
+import com.bookwebAI.order_service.entity.OrderItem;
+import com.bookwebAI.order_service.entity.enums.OrderStatus;
+import com.bookwebAI.order_service.repository.OrderItemRepository;
+import com.bookwebAI.order_service.repository.OrderRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
-@Service @RequiredArgsConstructor
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
 public class CartAppService {
+
     private final OrderRepository orderRepo;
     private final OrderItemRepository itemRepo;
     private final BookClient bookClient;
 
+    /**
+     * Helper: tính lại tổng của giỏ dựa trên item.total (đã làm tươi trước đó)
+     */
+    private void recomputeCartTotal(Order cart) {
+        int itemsTotal = cart.getItems().stream()
+                .map(i -> i.getTotal() == null ? 0 : i.getTotal())
+                .reduce(0, Integer::sum);
+        cart.setTotal(itemsTotal);
+        cart.setUpdatedAt(LocalDateTime.now());
+    }
+
+    /**
+     * Helper: gọi book-service lấy sách, ném lỗi gọn gàng
+     */
+    private BookDto fetchLiveBook(Long bookId) {
+        ApiResponse<BookDto> res = bookClient.getBook(bookId);
+        BookDto b = res.getData();
+        if (b == null) {
+            throw new RuntimeException("Không tìm thấy sách");
+        }
+        return b;
+    }
+
+    /**
+     * Helper: validate tồn kho hiện tại
+     */
+    private void ensureStock(BookDto b, int requiredQty) {
+        Integer stock = b.getStock(); // có thể null từ book-service cũ
+        if (stock == null || stock < requiredQty) {
+            throw new IllegalArgumentException("Số lượng vượt tồn kho");
+        }
+    }
+
+    /**
+     * Helper: làm tươi giá & tổng một item theo dữ liệu hiện tại của sách
+     */
+    private void refreshItemPricing(OrderItem it, BookDto b) {
+        // dùng giá hiện tại (live)
+        it.setPrice(b.getPrice());
+        it.setTotal(b.getPrice() * it.getQuantity());
+
+        // cập nhật info hiển thị (live) cho FE
+        it.setBookTitle(b.getTitle());
+        it.setBookImage(b.getImage());
+    }
+
     @Transactional
     public Order addToCart(String buyerId, AddToCartRequest req) {
+        // 1) Lấy/khởi tạo CART
         Order cart = orderRepo.findByBuyerIdAndStatus(buyerId, OrderStatus.CART)
                 .orElseGet(() -> orderRepo.save(Order.builder()
                         .buyerId(buyerId)
                         .status(OrderStatus.CART)
-                        .paymentStatus(false) // ⬅ thêm
+                        .paymentStatus(false)
                         .createdAt(LocalDateTime.now())
                         .updatedAt(LocalDateTime.now())
+                        .total(0)
                         .build()));
 
-        ApiResponse<BookDto> res = bookClient.getBook(req.getBookId());
-        BookDto b = res.getData();
-        if (b == null) throw new RuntimeException("Không tìm thấy sách");
-        if (b.getStock() == null || b.getStock() < req.getQuantity())
-            throw new IllegalArgumentException("Số lượng vượt tồn kho");
+        // 2) Lấy live book + validate stock theo (qty cũ + qty mới)
+        BookDto b = fetchLiveBook(req.getBookId());
 
         Optional<OrderItem> existed = cart.getItems().stream()
-                .filter(i -> i.getBookId().equals(req.getBookId())).findFirst();
+                .filter(i -> i.getBookId().equals(req.getBookId()))
+                .findFirst();
 
         if (existed.isPresent()) {
             OrderItem it = existed.get();
-            it.setQuantity(it.getQuantity() + req.getQuantity());
-            it.setPrice(b.getPrice());
-            it.setTotal(it.getPrice() * it.getQuantity());
+            int newQty = it.getQuantity() + req.getQuantity();
+            ensureStock(b, newQty);
+
+            it.setQuantity(newQty);
+            refreshItemPricing(it, b);
             itemRepo.save(it);
         } else {
-            cart.getItems().add(OrderItem.builder()
+            ensureStock(b, req.getQuantity());
+            OrderItem newItem = OrderItem.builder()
                     .order(cart)
                     .bookId(b.getId())
+                    .quantity(req.getQuantity())
+                    // các trường hiển thị/giá lấy live
                     .bookTitle(b.getTitle())
                     .bookImage(b.getImage())
                     .price(b.getPrice())
-                    .quantity(req.getQuantity())
                     .total(b.getPrice() * req.getQuantity())
                     .hasReview(false)
-                    .build());
+                    .build();
+            cart.getItems().add(newItem);
         }
 
-        cart.setTotal(cart.getItems().stream().map(i -> i.getTotal()==null?0:i.getTotal()).reduce(0, Integer::sum));
-        cart.setUpdatedAt(LocalDateTime.now());
+        // 3) Tính lại tổng giỏ
+        recomputeCartTotal(cart);
         return orderRepo.save(cart);
     }
 
+    /**
+     * GET giỏ hàng: làm tươi từng item theo giá hiện tại trước khi trả ra
+     * (để CART luôn phản ánh dữ liệu mới nhất)
+     */
     @Transactional
     public Order getCart(String buyerId) {
-        return orderRepo.findByBuyerIdAndStatus(buyerId, OrderStatus.CART).orElse(null);
+        Order cart = orderRepo.findByBuyerIdAndStatus(buyerId, OrderStatus.CART).orElse(null);
+        if (cart == null) return null;
+
+        // Làm tươi từng item theo dữ liệu live
+        for (OrderItem it : cart.getItems()) {
+            BookDto b = fetchLiveBook(it.getBookId());
+            // Quantity giữ nguyên; chỉ validate nhẹ stock để cảnh báo sớm (không ném lỗi để người dùng còn sửa)
+            // Bạn có thể lựa chọn: nếu hết hàng thì set total=0 và thêm flag ra DTO.
+            Integer stock = b.getStock();
+            if (stock != null && stock < it.getQuantity()) {
+                // vẫn cập nhật giá/tên/ảnh nhưng total giữ theo số lượng hiện có?
+                // Ở đây mình vẫn giữ nguyên quantity, FE có thể chặn ở bước checkout.
+            }
+            refreshItemPricing(it, b);
+        }
+
+        // Tính lại tổng giỏ theo giá live
+        recomputeCartTotal(cart);
+        return orderRepo.save(cart);
     }
 
     @Transactional
@@ -255,13 +271,12 @@ public class CartAppService {
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
         if (req.getQuantity() != null && req.getQuantity() == 0) {
+            // Xóa item
             cart.getItems().removeIf(i -> i.getBookId().equals(req.getBookId()));
         } else {
-            ApiResponse<BookDto> res = bookClient.getBook(req.getBookId());
-            BookDto b = res.getData();
-            if (b == null) throw new RuntimeException("Không tìm thấy sách");
-            if (b.getStock() == null || b.getStock() < req.getQuantity())
-                throw new IllegalArgumentException("Số lượng vượt tồn kho");
+            // Làm tươi từ book-service và validate tồn kho với số lượng mới
+            BookDto b = fetchLiveBook(req.getBookId());
+            ensureStock(b, req.getQuantity());
 
             OrderItem it = cart.getItems().stream()
                     .filter(i -> i.getBookId().equals(req.getBookId()))
@@ -269,13 +284,11 @@ public class CartAppService {
                     .orElseThrow(() -> new RuntimeException("Item không tồn tại trong giỏ"));
 
             it.setQuantity(req.getQuantity());
-            it.setPrice(b.getPrice());
-            it.setTotal(b.getPrice() * req.getQuantity());
+            refreshItemPricing(it, b);
             itemRepo.save(it);
         }
 
-        cart.setTotal(cart.getItems().stream().map(i -> i.getTotal()==null?0:i.getTotal()).reduce(0, Integer::sum));
-        cart.setUpdatedAt(LocalDateTime.now());
+        recomputeCartTotal(cart);
         return orderRepo.save(cart);
     }
 
@@ -283,9 +296,9 @@ public class CartAppService {
     public void removeItem(String buyerId, Long bookId) {
         Order cart = orderRepo.findByBuyerIdAndStatus(buyerId, OrderStatus.CART)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
+
         cart.getItems().removeIf(i -> i.getBookId().equals(bookId));
-        cart.setTotal(cart.getItems().stream().map(i -> i.getTotal()==null?0:i.getTotal()).reduce(0, Integer::sum));
-        cart.setUpdatedAt(LocalDateTime.now());
+        recomputeCartTotal(cart);
         orderRepo.save(cart);
     }
 }

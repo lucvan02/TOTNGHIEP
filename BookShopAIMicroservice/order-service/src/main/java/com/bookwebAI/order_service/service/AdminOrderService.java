@@ -32,21 +32,25 @@ public class AdminOrderService {
         OrderStatus next = OrderStatus.valueOf(req.getStatus().toUpperCase());
         OrderStatus prev = o.getStatus();
 
-        // Hạn chế hủy: chỉ cho hủy khi chưa giao
-        if (next == OrderStatus.CANCELLED && (prev == OrderStatus.SHIPPED || prev == OrderStatus.COMPLETED)) {
-            throw new IllegalStateException("Không thể hủy đơn sau khi đã giao.");
+        // Hạn chế hủy: chỉ cho hủy khi chưa hoàn thành
+        if (next == OrderStatus.CANCELLED && (prev == OrderStatus.COMPLETED)) {
+            throw new IllegalStateException("Không thể hủy đơn đã hoàn thành.");
         }
 
         // Chuyển trạng thái
         o.setStatus(next);
         if (next == OrderStatus.CANCELLED) {
             o.setCancelReason(req.getCancelReason());
+            // Trả lại tăng KHO tại đây
+            for (OrderItem it : o.getItems()) {
+                bookClient.decreaseStock(it.getBookId(), it.getQuantity()*-1);
+            }
         }
         o.setUpdatedAt(LocalDateTime.now());
         o = orderRepo.save(o);
 
         // Hành động theo trạng thái
-        if (next == OrderStatus.SHIPPED) {
+        if (next == OrderStatus.PENDING) {
             // TRỪ KHO tại đây
             for (OrderItem it : o.getItems()) {
                 bookClient.decreaseStock(it.getBookId(), it.getQuantity());
