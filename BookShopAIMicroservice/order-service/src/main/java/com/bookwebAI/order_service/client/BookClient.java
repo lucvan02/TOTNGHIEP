@@ -7,6 +7,8 @@ import com.bookwebAI.order_service.client.dto.RatingUpdateDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @FeignClient(name = "book-service")
 public interface BookClient {
@@ -26,4 +28,8 @@ public interface BookClient {
 
     @GetMapping("/api/books/{id}")
     ApiResponse<BookLiteDto> getById(@PathVariable("id") Long id);
+
+    // bulk nội bộ để tránh N+1
+    @GetMapping("/api/books/bulk")
+    ApiResponse<List<BookDto>> bulk(@RequestParam("ids") List<Long> ids);
 }

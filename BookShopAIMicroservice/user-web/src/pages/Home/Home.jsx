@@ -161,6 +161,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import BookCard from "../../components/BookCard";
 import Slider from "react-slick";
+import Footer from "../../components/Footer/Footer";
 
 export default function Home() {
   const [books, setBooks] = useState([]);
@@ -371,6 +372,7 @@ export default function Home() {
           </>
         )}
       </Box>
+      <Footer />
     </>
   );
 }

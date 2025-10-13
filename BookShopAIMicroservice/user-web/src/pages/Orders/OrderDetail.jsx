@@ -81,7 +81,7 @@ export default function OrderDetail() {
   const doCancel = async () => {
     const map = {
       OUT_OF_STOCK: "Không muốn mua nữa",
-      INVALID_INFO: "Sai thông tin nhận hàng",
+      INVALID_INFO: "Sửa đổi thông tin",
       OTHER: cancelDlg.other?.trim() || "Không muốn tiết lộ",
     };
     const reason = cancelDlg.reasonType === "OTHER" ? map.OTHER : map[cancelDlg.reasonType];
@@ -146,15 +146,17 @@ export default function OrderDetail() {
         </Typography>
 
         <Box display="flex" gap={1} alignItems="center">
-          <Chip label={order.status} color={color(order.status)} />
+          {/* trạng thái đơn hàng thay thành tiếng Việt, có các trạng thái: PENDING, CONFIRM, SHIPPED, COMPLETED, CANCELED */}
+
+          <Chip label={order.status === "PENDING" ? "CHỜ XÁC NHẬN" : order.status === "CONFIRM" ? "ĐÃ XÁC NHẬN" : order.status === "SHIPPED" ? "ĐANG GIAO" : order.status === "COMPLETED" ? "ĐÃ HOÀN TẤT" : "ĐÃ HỦY"} color={color(order.status)} />
           <Chip label={order.paymentStatus ? "ĐÃ THANH TOÁN" : "CHƯA THANH TOÁN"} />
           <Chip label={`PM: ${order.paymentMethod || "-"}`} variant="outlined" />
           <Chip label={`Tổng: ${money(order.total)}`} color="primary" variant="outlined" />
-          {canCancel && (
+          {/* {canCancel && (
             <Button color="error" variant="outlined" onClick={openCancel}>
               Hủy đơn
             </Button>
-          )}
+          )} */}
           <Button variant="text" onClick={() => nav("/orders")}>
             ← Quay lại lịch sử
           </Button>
@@ -165,6 +167,11 @@ export default function OrderDetail() {
         <CardContent>
           <Box display="flex" gap={1} flexWrap="wrap" mb={1}>
             <Chip label={`Tạo lúc: ${fmt(order.createdAt)}`} />
+            <Chip label={`Cập nhật: ${fmt(order.updatedAt)}`} />
+            {/* {order.confirmedAt && <Chip label={`Xác nhận: ${fmt(order.confirmedAt)}`} />}
+            {order.shippedAt && <Chip label={`Giao hàng: ${fmt(order.shippedAt)}`} />}
+            {order.completedAt && <Chip label={`Hoàn tất: ${fmt(order.completedAt)}`} />}
+            {order.cancelledAt && <Chip label={`Hủy lúc: ${fmt(order.cancelledAt)}`} />} */}
             {order.shippingFee != null && <Chip label={`Ship: ${money(order.shippingFee)}`} />}
             {order.cancelReason && <Chip color="error" label={`Lý do hủy: ${order.cancelReason}`} />}
           </Box>
@@ -213,6 +220,7 @@ export default function OrderDetail() {
                   <TableCell align="right">{it.quantity}</TableCell>
                   <TableCell align="right">{money(it.total)}</TableCell>
                   <TableCell align="center">
+                    {/* chỉ cho đánh giá nếu đơn đã hoàn thành */}
                     {order.status === "COMPLETED" ? (
                       it.hasReview ? (
                         <Typography color="success.main" fontSize={13}>
@@ -224,7 +232,13 @@ export default function OrderDetail() {
                         </Button>
                       )
                     ) : (
-                      "-"
+                      ""
+                    )}
+                    {/* neu trang thai don la pending thi hien thi nut huy don */}
+                    {order.status === "PENDING" && (
+                      <Button size="small" variant="outlined" color="error" onClick={openCancel}>
+                        Hủy đơn
+                      </Button>
                     )}
                   </TableCell>
                 </TableRow>
@@ -280,8 +294,8 @@ export default function OrderDetail() {
           onChange={(e) => setCancelDlg((s) => ({ ...s, reasonType: e.target.value }))}
         >
           <Space direction="vertical">
-            <Radio value="OUT_OF_STOCK">Hết hàng</Radio>
-            <Radio value="INVALID_INFO">Thông tin không hợp lệ</Radio>
+            <Radio value="OUT_OF_STOCK">Không muốn mua nữa</Radio>
+            <Radio value="INVALID_INFO">Sửa đổi thông tin</Radio>
             <Radio value="OTHER">Lý do khác</Radio>
           </Space>
         </Radio.Group>
@@ -297,7 +311,7 @@ export default function OrderDetail() {
         )}
 
         <Typography mt={1} variant="body2" color="text.secondary">
-          Sau khi xác nhận, đơn sẽ chuyển sang trạng thái <b>Cancelled</b> và hệ thống sẽ gửi email thông báo.
+          Sau khi xác nhận, đơn sẽ chuyển sang trạng thái hủy
         </Typography>
       </AntdModal>
 

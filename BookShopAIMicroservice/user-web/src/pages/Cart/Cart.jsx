@@ -418,8 +418,8 @@ export default function Cart() {
       const res = await orderApi.checkout(uid, form);
       const order = res?.data?.data;
       notify("success", `Đặt hàng thành công • Mã đơn: ${order?.id}`);
-      // Điều hướng về lịch sử đơn
-      window.location.href = `/orders`;
+      //tạm ngưng một thoi gian để khách hàng đọc thông báo
+      setTimeout(() => { window.location.href = `/orders`; }, 1500);
     } catch (e) {
       console.error(e);
       // hiển thị message từ BE nếu có

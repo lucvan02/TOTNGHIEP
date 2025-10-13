@@ -15,6 +15,7 @@ import OrderDetail from "../pages/Orders/OrderDetail";
 import CategoryBooks from "../pages/CategoryBooks/CategoryBooks";
 import AuthorBooks from "../pages/AuthorBooks/AuthorBooks";
 import FavoriteList from "../pages/Favorite/FavoriteList";
+import PublisherBooks from "../pages/PublisherBooks/PublisherBooks";
 
 export default function AppRouter() {
   return (
@@ -39,6 +40,7 @@ export default function AppRouter() {
 
           <Route path="/category/:id" element={<CategoryBooks />} />
           <Route path="/author/:id" element={<AuthorBooks />} />
+          <Route path="/publisher/:id" element={<PublisherBooks />} />
           <Route path="/favorites" element={<FavoriteList />} />
 
         </Route>

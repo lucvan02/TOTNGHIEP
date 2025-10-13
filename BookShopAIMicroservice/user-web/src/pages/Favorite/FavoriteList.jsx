@@ -37,14 +37,22 @@ export default function FavoriteList() {
         {items.map(it => (
           <Grid key={it.id} item xs={12} sm={6} md={4} lg={3}>
             <Card sx={{ borderRadius: 2, overflow: "hidden" }}>
-              <CardMedia component="img" image={it.bookImage} alt={it.bookTitle} sx={{ height: 200, objectFit: "cover" }}/>
+              <CardMedia component="img" image={it.image} alt={it.title} sx={{ height: 200, objectFit: "cover" }}/>
               <CardContent>
-                <Typography fontWeight={700} noWrap>{it.bookTitle}</Typography>
-                {/* <Typography color="primary" fontWeight={700}>{money(it.price)}</Typography> */}
+                <Typography fontWeight={700} noWrap>{it.title}</Typography>
+                <Typography color="primary" fontWeight={700}>{money(it.price)}</Typography>
                 <Box display="flex" gap={1} mt={1.5}>
                   <Button size="small" variant="outlined" onClick={()=> removeOne(it.bookId)}>Xóa</Button>
                   <Button size="small" variant="contained" href={`/book/${it.bookId}`}>Xem sách</Button>
                 </Box>
+
+              {/* <Typography color="text.secondary" fontSize={13}>
+                {it.live ? "Live" : "Snapshot"} •
+                {typeof it.stock === "number" ? ` Còn: ${it.stock}` : ""}
+                {typeof it.status === "number" ? ` • Trạng thái: ${it.status === 1 ? "Hiển thị" : "Ẩn"}` : ""}
+              </Typography> */}
+
+
               </CardContent>
             </Card>
           </Grid>

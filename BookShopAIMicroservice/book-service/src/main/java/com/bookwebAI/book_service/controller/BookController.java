@@ -111,6 +111,16 @@ public class BookController {
         );
     }
 
+    @GetMapping("/by-publisher/{publisherId}")
+    public ResponseEntity<ApiResponse<Page<BookDTO>>> getByPublisher(
+            @PathVariable Long publisherId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+        return ResponseEntity.ok(
+                new ApiResponse<>("Lấy sách theo nhà xuất bản thành công", service.getByPublisher(publisherId, page, size))
+        );
+    }
+
 
     // Top bán chạy
     @GetMapping("/top-sale")
@@ -144,6 +154,12 @@ public class BookController {
     public ApiResponse<String> updateRating(@PathVariable Long bookId, @RequestBody RatingUpdateDto dto) {
         service.updateRating(bookId, dto.getAverage(), dto.getCount());
         return new ApiResponse<>("OK", "updated");
+    }
+
+    @GetMapping("/bulk")
+    public ApiResponse<List<BookDTO>> bulk(@RequestParam("ids") List<Long> ids) {
+        // Spring tự parse "1,2,5" -> List<Long> {1,2,5}
+        return new ApiResponse<>("OK", service.bulkByIds(ids));
     }
 
 

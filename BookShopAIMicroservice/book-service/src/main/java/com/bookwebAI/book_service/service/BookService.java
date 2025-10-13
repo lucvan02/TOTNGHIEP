@@ -179,6 +179,13 @@ public class BookService {
         return bookPage.map(bookMapper::toDTO);
     }
 
+    //tạo hàm lấy sách theo nhà xuất bản
+    public Page<BookDTO> getByPublisher(Long publisherId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Book> bookPage = bookRepository.findByPublisher_Id(publisherId, pageable);
+        return bookPage.map(bookMapper::toDTO);
+    }
+
 
 
     public List<BookDTO> getTopSale() {
@@ -213,6 +220,12 @@ public class BookService {
                 .orElseThrow(() -> new RuntimeException("Book not found"));
         book.setStar(newAvg.floatValue());
         bookRepository.save(book);
+    }
+
+    public List<BookDTO> bulkByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) return List.of();
+//        return bookMapper.toDTOs(bookRepository.findAllByIds(ids));
+        return bookRepository.findAllByIds(ids).stream().map(bookMapper::toDTO).toList();
     }
 
 }

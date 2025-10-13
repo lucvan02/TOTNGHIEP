@@ -12,6 +12,7 @@ import { Modal as AntdModal, Radio, Space, message } from "antd"; // dùng antd 
 
 const fmtVND = (n) => (n ?? 0).toLocaleString() + "₫";
 const fmtDate = (s) => (s ? new Date(s).toLocaleString() : "");
+
 const statusColor = (st) => ({PENDING:"warning",CONFIRM:"info",SHIPPED:"primary",COMPLETED:"success",CANCELLED:"error"}[(st||"").toUpperCase()]||"default");
 const PayChip = ({ paid }) => <Chip label={paid ? "ĐÃ THANH TOÁN" : "CHƯA THANH TOÁN"} color={paid ? "success" : "default"} size="small" />;
 
@@ -119,19 +120,21 @@ export default function OrderHistory() {
               {sorted.map(o=>(
                 <TableRow key={o.id} hover>
                   <TableCell sx={{fontFamily:"monospace"}}>{o.id}</TableCell>
-                  <TableCell><Chip label={o.status} color={statusColor(o.status)} size="small"/></TableCell>
+                   {/* trạng thái đơn hàng thay thành tiếng Việt, có các trạng thái: PENDING, CONFIRM, SHIPPED, COMPLETED, CANCELED dịch ra tương ứng*/}                   
+                  <TableCell><Chip label={o.status === "PENDING" ? "CHỜ XÁC NHẬN" : o.status === "CONFIRM" ? "ĐÃ XÁC NHẬN" : o.status === "SHIPPED" ? "ĐANG GIAO" : o.status === "COMPLETED" ? "ĐÃ HOÀN TẤT" : "ĐÃ HỦY"} color={statusColor(o.status)} size="small"/></TableCell>
+                  {/* <TableCell><Chip label={o.status} color={statusColor(o.status)} size="small"/></TableCell> */}
                   <TableCell><PayChip paid={!!o.paymentStatus}/></TableCell>
                   <TableCell>{o.paymentMethod || "-"}</TableCell>
                   <TableCell align="right" sx={{fontWeight:700}}>{fmtVND(o.total)}</TableCell>
                   <TableCell>{fmtDate(o.createdAt)}</TableCell>
                   <TableCell align="right">
-                    <Button size="small" variant="contained" onClick={()=> nav(`/orders/${o.id}`)}>Xem</Button>
+                    <Button size="small" variant="contained" onClick={()=> nav(`/orders/${o.id}`)}>Xem Chi tiết</Button>
                     {/* <Button size="small" sx={{ml:1}} variant="outlined" onClick={()=> openDetailQuick(o)}>Xem nhanh</Button> */}
-                    {o.status === "PENDING" && (
+                    {/* {o.status === "PENDING" && (
                       <Button size="small" color="error" sx={{ml:1}} onClick={()=> openCancel(o)}>
                         Hủy đơn
                       </Button>
-                    )}
+                    )} */}
                   </TableCell>
                 </TableRow>
               ))}

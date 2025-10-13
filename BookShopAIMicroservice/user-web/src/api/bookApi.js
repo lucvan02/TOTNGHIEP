@@ -18,4 +18,7 @@ export const bookApi = {
 
   getByCategory: (categoryId, page = 0, size = 8) =>
     axios.get(`${API_URL}/by-category/${categoryId}?page=${page}&size=${size}`),
+
+  getByPublisher: (publisherId, page = 0, size = 8) =>
+    axios.get(`${API_URL}/by-publisher/${publisherId}?page=${page}&size=${size}`),
 };
