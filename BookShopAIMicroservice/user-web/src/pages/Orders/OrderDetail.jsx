@@ -152,11 +152,11 @@ export default function OrderDetail() {
           <Chip label={order.paymentStatus ? "ĐÃ THANH TOÁN" : "CHƯA THANH TOÁN"} />
           <Chip label={`PM: ${order.paymentMethod || "-"}`} variant="outlined" />
           <Chip label={`Tổng: ${money(order.total)}`} color="primary" variant="outlined" />
-          {/* {canCancel && (
+          {canCancel && (
             <Button color="error" variant="outlined" onClick={openCancel}>
               Hủy đơn
             </Button>
-          )} */}
+          )}
           <Button variant="text" onClick={() => nav("/orders")}>
             ← Quay lại lịch sử
           </Button>
@@ -234,12 +234,13 @@ export default function OrderDetail() {
                     ) : (
                       ""
                     )}
+
                     {/* neu trang thai don la pending thi hien thi nut huy don */}
-                    {order.status === "PENDING" && (
+                    {/* {order.status === "PENDING" && (
                       <Button size="small" variant="outlined" color="error" onClick={openCancel}>
                         Hủy đơn
                       </Button>
-                    )}
+                    )} */}
                   </TableCell>
                 </TableRow>
               ))}

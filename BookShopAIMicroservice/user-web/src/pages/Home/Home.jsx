@@ -282,7 +282,7 @@ export default function Home() {
             boxShadow: 3,
           }}
         >
-          <Slider {...sliderSettings}>
+          {/* <Slider {...sliderSettings}>
             {banners.map((url, idx) => (
               <Box key={idx}>
                 <img
@@ -297,7 +297,7 @@ export default function Home() {
                 />
               </Box>
             ))}
-          </Slider>
+          </Slider> */}
         </Box>
       )}
 

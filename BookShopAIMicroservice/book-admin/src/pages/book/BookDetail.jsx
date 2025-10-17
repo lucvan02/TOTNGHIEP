@@ -22,6 +22,7 @@ import authorApi from "../../api/authorApi";
 import categoryApi from "../../api/categoryApi";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
+// import ReviewSection from "./ReviewSection";
 
 const API_BASE = "http://localhost:8080";
 
@@ -378,7 +379,13 @@ const BookDetail = () => {
           </Modal>
         </>
       )}
+
+      {/* <ReviewSection bookId={id} initialAvg={initialAvg} initialCount={initialCount} /> */}
     </div>
+
+    
+    /* Reviews tách ra component riêng */
+      // <ReviewSection bookId={Number(id)} initialAvg={avg} initialCount={count} />
   );
 };
 

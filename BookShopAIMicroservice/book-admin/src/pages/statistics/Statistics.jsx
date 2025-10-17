@@ -70,24 +70,38 @@ export default function Statistics() {
       <Row gutter={16}>
         <Col xs={24} md={6}>
           <Card loading={loading}>
-            <Statistic title="Doanh thu (COMPLETED)" value={money(kpi?.revenue || 0)} />
+            <Statistic title="Số sản phẩm" value={4} />
           </Card>
         </Col>
+        <Col xs={24} md={6}>
+          <Card loading={loading}>
+            <Statistic title="Số lượng đơn hàng" value={kpi?.totalOrders || 0} />
+          </Card>
+        </Col>
+
         <Col xs={24} md={6}>
           <Card loading={loading}>
             <Statistic title="Đơn hoàn thành" value={kpi?.completedOrders || 0} />
           </Card>
         </Col>
+
         <Col xs={24} md={6}>
+          <Card loading={loading}>
+            <Statistic title="Doanh thu" value={money(kpi?.revenue || 0)} />
+          </Card>
+        </Col>
+
+
+        {/* <Col xs={24} md={6}>
           <Card loading={loading}>
             <Statistic title="AOV (giá trị TB/đơn)" value={money(aov)} />
           </Card>
-        </Col>
-        <Col xs={24} md={6}>
+        </Col> */}
+        {/* <Col xs={24} md={6}>
           <Card loading={loading}>
             <Statistic title="Tỉ lệ thanh toán" value={`${conversionPct}%`} />
           </Card>
-        </Col>
+        </Col> */}
       </Row>
 
       {/* Charts */}
@@ -116,7 +130,7 @@ export default function Statistics() {
       </Row>
 
       <Row gutter={16}>
-        <Col xs={24} lg={12}>
+        {/* <Col xs={24} lg={12}>
           <Card title="Phân bố trạng thái đơn" loading={loading}>
             <Pie
               data={statusDist}
@@ -126,8 +140,8 @@ export default function Statistics() {
               legend={{ position: "bottom" }}
             />
           </Card>
-        </Col>
-        <Col xs={24} lg={12}>
+        </Col> */}
+        {/* <Col xs={24} lg={12}>
           <Card title="Phương thức thanh toán" loading={loading}>
             <Pie
               data={pmDist}
@@ -137,11 +151,11 @@ export default function Statistics() {
               legend={{ position: "bottom" }}
             />
           </Card>
-        </Col>
+        </Col> */}
       </Row>
 
       {/* Top books */}
-      <Card title="Top sách theo doanh thu" loading={loading}>
+      <Card title="Top sách bán chạy" loading={loading}>
         <Table
           rowKey={(r) => r.bookId}
           dataSource={topBooks}
@@ -161,14 +175,14 @@ export default function Statistics() {
                 </Space>
               ),
             },
-            { title: "Số lượng", dataIndex: "qty", width: 120 },
-            {
-              title: "Doanh thu",
-              dataIndex: "revenue",
-              width: 160,
-              render: (v) => money(v),
-              sorter: (a, b) => a.revenue - b.revenue
-            },
+            { title: "Đã bán", dataIndex: "qty", width: 120 },
+            // {
+            //   title: "Doanh thu",
+            //   dataIndex: "revenue",
+            //   width: 160,
+            //   render: (v) => money(v),
+            //   sorter: (a, b) => a.revenue - b.revenue
+            // },
           ]}
         />
       </Card>
