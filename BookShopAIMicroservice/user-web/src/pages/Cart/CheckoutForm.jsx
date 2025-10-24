@@ -62,7 +62,8 @@ export default function CheckoutForm({
         const paymentUrl = res?.data?.data?.paymentUrl;
         if (paymentUrl) {
           notify("success", "Đang chuyển đến cổng thanh toán...");
-          window.open(paymentUrl, "_blank"); // 👉 đi tới cổng thanh toán ở tab mới
+          window.open(paymentUrl, "_blank"); // 👉 đi tới cổng thanh toán ở tab mới và ở tab hiện tại chuyển sang lịch sử đơn hang
+          setTimeout(() => (window.location.href = "/orders"), 1500);
           return;
         } else {
           notify("error", "Không nhận được liên kết thanh toán");

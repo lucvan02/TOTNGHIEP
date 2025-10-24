@@ -53,4 +53,13 @@ export const orderApi = {
     ? axios.post(`${BASE}/api/orders/${encodeURIComponent(buyerId)}/checkout-online`, payload)
     : axios.post(`${BASE}/api/orders/checkout-online`, payload, { headers: { "X-User-Id": buyerId } }),
 
+  // đổi phương thức thanh toán
+  changePaymentMethod: (orderId, method) =>
+  axios.put(`${BASE}/api/orders/${orderId}/payment-method`, null, { params: { method } }),
+
+// tạo link VNPay cho đơn đã có (đơn PENDING, ONLINE, chưa thanh toán)
+  payOnline: (orderId) =>
+  axios.post(`${BASE}/api/orders/${orderId}/pay-online`),
+
+
 };

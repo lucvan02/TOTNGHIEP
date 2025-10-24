@@ -104,7 +104,7 @@ export default function BookDetail() {
           <Box display="flex" alignItems="center" gap={1} mb={1.5}>
             <Rating value={avg} readOnly precision={0.1} />
             <Typography variant="body1" color="text.secondary">
-              {avg.toFixed(1)} ({count} đánh giá)
+              {/* {avg.toFixed(1)} ({count} đánh giá) */}
             </Typography>
           </Box>
 
