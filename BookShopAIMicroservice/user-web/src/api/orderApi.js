@@ -47,4 +47,10 @@ export const orderApi = {
     USE_PATH_BUYERID
       ? axios.post(`${BASE}/api/orders/${encodeURIComponent(buyerId)}/${orderId}/cancel`, { reason })
       : axios.post(`${BASE}/api/orders/${orderId}/cancel`, { reason }, { headers: { "X-User-Id": buyerId } }),
+
+  checkoutOnline: (buyerId, payload) =>
+  USE_PATH_BUYERID
+    ? axios.post(`${BASE}/api/orders/${encodeURIComponent(buyerId)}/checkout-online`, payload)
+    : axios.post(`${BASE}/api/orders/checkout-online`, payload, { headers: { "X-User-Id": buyerId } }),
+
 };

@@ -1,161 +1,6 @@
-// import {
-//   Card,
-//   CardContent,
-//   Typography,
-//   Box,
-//   TextField,
-//   Divider,
-//   RadioGroup,
-//   FormControlLabel,
-//   Radio,
-//   Button,
-//   Snackbar,
-//   Alert,
-// } from "@mui/material";
-// import { useState, useMemo } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { orderApi } from "../../api/orderApi";
-
-// export default function CheckoutForm({ cart, refreshCart }) {
-//   const navigate = useNavigate();
-//   const user = JSON.parse(localStorage.getItem("user"));
-//   const uid = user?.uid;
-//   const [form, setForm] = useState({
-//     receiveName: `${user?.firstname || ""} ${user?.lastname || ""}`.trim(),
-//     receivePhone: user?.phone || "",
-//     receiveAddress: user?.address || "",
-//     shippingFee: 15000,
-//     note: "Giao giờ hành chính",
-//     paymentMethod: "COD",
-//   });
-//   const [busy, setBusy] = useState(false);
-//   const [toast, setToast] = useState({ open: false, type: "success", msg: "" });
-
-//   const itemsTotal = useMemo(
-//     () => cart.items.reduce((s, i) => s + (i.total || 0), 0),
-//     [cart]
-//   );
-
-//   const notify = (type, msg) => setToast({ open: true, type, msg });
-
-//   const handleCheckout = async () => {
-//     try {
-//       setBusy(true);
-//       await orderApi.checkout(uid, form);
-//       notify("success", "Đặt hàng thành công!");
-//       await refreshCart(); // reset badge
-//       setTimeout(() => navigate("/orders"), 1000);
-//     } catch (e) {
-//       console.error(e);
-//       notify("error", "Checkout thất bại");
-//     } finally {
-//       setBusy(false);
-//     }
-//   };
-
-//   return (
-//     <Card sx={{ boxShadow: 3, borderRadius: 3 }}>
-//       <CardContent>
-//         <Typography variant="h6" mb={2}>
-//           📦 Thông tin nhận hàng
-//         </Typography>
-//         <Box display="grid" gap={1.5}>
-//           <TextField
-//             label="Họ tên"
-//             size="small"
-//             value={form.receiveName}
-//             onChange={(e) => setForm({ ...form, receiveName: e.target.value })}
-//           />
-//           <TextField
-//             label="Số điện thoại"
-//             size="small"
-//             value={form.receivePhone}
-//             onChange={(e) => setForm({ ...form, receivePhone: e.target.value })}
-//           />
-//           <TextField
-//             label="Địa chỉ"
-//             size="small"
-//             value={form.receiveAddress}
-//             onChange={(e) => setForm({ ...form, receiveAddress: e.target.value })}
-//           />
-//           <TextField
-//             label="Phí vận chuyển"
-//             size="small"
-//             type="number"
-//             value={form.shippingFee}
-//             onChange={(e) => setForm({ ...form, shippingFee: Number(e.target.value) })}
-//           />
-//           <TextField
-//             label="Ghi chú"
-//             size="small"
-//             value={form.note}
-//             onChange={(e) => setForm({ ...form, note: e.target.value })}
-//           />
-//         </Box>
-
-//         <Divider sx={{ my: 2 }} />
-
-//         <RadioGroup
-//           row
-//           value={form.paymentMethod}
-//           onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
-//         >
-//           <FormControlLabel value="COD" control={<Radio />} label="COD" />
-//           <FormControlLabel value="ONLINE" control={<Radio />} label="Online" />
-//         </RadioGroup>
-
-//         <Divider sx={{ my: 2 }} />
-
-//         <Box display="flex" justifyContent="space-between" mb={1}>
-//           <Typography>Tạm tính</Typography>
-//           <Typography>{itemsTotal.toLocaleString()}₫</Typography>
-//         </Box>
-//         <Box display="flex" justifyContent="space-between" mb={1}>
-//           <Typography>Phí ship</Typography>
-//           <Typography>{form.shippingFee.toLocaleString()}₫</Typography>
-//         </Box>
-//         <Divider sx={{ my: 1 }} />
-//         <Box display="flex" justifyContent="space-between" fontWeight={700}>
-//           <Typography>Tổng cộng</Typography>
-//           <Typography color="primary">
-//             {(itemsTotal + form.shippingFee).toLocaleString()}₫
-//           </Typography>
-//         </Box>
-
-//         <Button
-//           fullWidth
-//           variant="contained"
-//           color="primary"
-//           sx={{ mt: 2, py: 1.2 }}
-//           disabled={busy}
-//           onClick={handleCheckout}
-//         >
-//           Xác nhận đặt hàng ({form.paymentMethod})
-//         </Button>
-
-//         <Snackbar
-//           open={toast.open}
-//           autoHideDuration={2000}
-//           onClose={() => setToast({ ...toast, open: false })}
-//         >
-//           <Alert severity={toast.type} variant="filled">
-//             {toast.msg}
-//           </Alert>
-//         </Snackbar>
-//       </CardContent>
-//     </Card>
-//   );
-// }
 
 
-
-
-
-
-
-
-import React from "react";
-
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -183,7 +28,7 @@ export default function CheckoutForm({
   notify,
   load,
 }) {
-  const [form, setForm] = React.useState({
+  const [form, setForm] = useState({
     receiveName: `${JSON.parse(localStorage.getItem("user"))?.firstname || ""} ${
       JSON.parse(localStorage.getItem("user"))?.lastname || ""
     }`.trim(),
@@ -211,10 +56,24 @@ export default function CheckoutForm({
 
     try {
       setBusy(true);
-      const res = await orderApi.checkout(uid, form);
-      const order = res?.data?.data;
-      notify("success", `Đặt hàng thành công • Mã đơn: ${order?.id}`);
-      setTimeout(() => (window.location.href = "/orders"), 1500);
+      // 🟢 Nếu chọn thanh toán online
+      if (form.paymentMethod === "ONLINE") {
+        const res = await orderApi.checkoutOnline(uid, form);
+        const paymentUrl = res?.data?.data?.paymentUrl;
+        if (paymentUrl) {
+          notify("success", "Đang chuyển đến cổng thanh toán...");
+          window.open(paymentUrl, "_blank"); // 👉 đi tới cổng thanh toán ở tab mới
+          return;
+        } else {
+          notify("error", "Không nhận được liên kết thanh toán");
+        }
+      } else {
+        // 🟠 COD bình thường
+        const res = await orderApi.checkout(uid, form);
+        const order = res?.data?.data;
+        notify("success", `Đặt hàng thành công • Mã đơn: ${order?.id}`);
+        setTimeout(() => (window.location.href = "/orders"), 1500);
+      }
     } catch (e) {
       console.error(e);
       notify("error", e?.response?.data?.message || "Checkout thất bại");
@@ -254,7 +113,9 @@ export default function CheckoutForm({
             type="number"
             size="small"
             value={form.shippingFee}
-            onChange={(e) => setForm({ ...form, shippingFee: Number(e.target.value) })}
+            onChange={(e) =>
+              setForm({ ...form, shippingFee: Number(e.target.value) })
+            }
           />
           <TextField
             label="Ghi chú"
@@ -286,7 +147,12 @@ export default function CheckoutForm({
           <Typography>{(form.shippingFee || 0).toLocaleString()}₫</Typography>
         </Box>
         <Divider sx={{ my: 1 }} />
-        <Box display="flex" justifyContent="space-between" fontWeight={700} fontSize={17}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          fontWeight={700}
+          fontSize={17}
+        >
           <Typography>Tổng cộng</Typography>
           <Typography color="primary">
             {(itemsTotal + (form.shippingFee || 0)).toLocaleString()}₫
@@ -309,7 +175,9 @@ export default function CheckoutForm({
               disabled={busy || !canCheckout}
               onClick={handleCheckout}
             >
-              Xác nhận đặt hàng ({form.paymentMethod})
+              {form.paymentMethod === "ONLINE"
+                ? "Thanh toán Online"
+                : `Xác nhận đặt hàng (${form.paymentMethod})`}
             </Button>
           </span>
         </Tooltip>

@@ -57,3 +57,12 @@ resilience4j:
         failureRateThreshold: 50
 
 
+
+vnpay:
+  tmnCode: MFJL9FWU      # mã terminal từ sandbox
+  hashSecret: 8CN65DWHZQF9Y41FLZ0JN0EDO9U5RQY3 # key bí mật từ sandbox
+  url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+  returnUrl: http://localhost:8084/api/orders/vnpay-return
+
+
+
