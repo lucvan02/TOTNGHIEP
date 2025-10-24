@@ -1,8 +1,7 @@
-// @api/clients/ghn_location_api.ts
 const GHN_BASE = "https://online-gateway.ghn.vn/shiip/public-api/master-data";
 const TOKEN = "ce200e6a-5946-11f0-a16a-2e9c57086fef";
 
-async function fetchGHN(endpoint: string, body?: object) {
+async function fetchGHN(endpoint, body) {
   const res = await fetch(`${GHN_BASE}/${endpoint}`, {
     method: "POST",
     headers: {
@@ -19,6 +18,6 @@ async function fetchGHN(endpoint: string, body?: object) {
 
 export const GHNLocationApi = {
   getProvinces: () => fetchGHN("province"),
-  getDistricts: (province_id: number) => fetchGHN("district", { province_id }),
-  getWards: (district_id: number) => fetchGHN("ward", { district_id }),
+  getDistricts: (province_id) => fetchGHN("district", { province_id }),
+  getWards: (district_id) => fetchGHN("ward", { district_id }),
 };

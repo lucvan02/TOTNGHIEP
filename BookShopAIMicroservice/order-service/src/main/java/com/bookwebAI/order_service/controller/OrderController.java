@@ -241,7 +241,7 @@ public class OrderController {
     @PostMapping("/{orderId}/pay-online")
     public ApiResponse<Map<String, Object>> payOnline(@PathVariable String orderId) {
         Order o = orderRepo.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
-        if (o.getStatus() != OrderStatus.PENDING) throw new RuntimeException("Chỉ thanh toán khi đơn đang PENDING");
+//        if (o.getStatus() != OrderStatus.PENDING) throw new RuntimeException("Chỉ thanh toán khi đơn đang PENDING");
         if (Boolean.TRUE.equals(o.getPaymentStatus())) throw new RuntimeException("Đơn đã thanh toán");
         // nếu chưa là ONLINE thì ép sang ONLINE
         if (o.getPaymentMethod() != com.bookwebAI.order_service.entity.enums.PaymentMethod.ONLINE) {
