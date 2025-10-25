@@ -37,8 +37,11 @@ const Sidebar = () => {
         defaultOpenKeys={["sub-products"]}
       >
         {/* Dashboard */}
-        <Menu.Item key="/statistics" icon={<BarChartOutlined />}>
+        {/* <Menu.Item key="/statistics" icon={<BarChartOutlined />}>
           <Link to="/statistics">Thống kê</Link>
+        </Menu.Item> */}
+        <Menu.Item key="/admin/analytics" icon={<BarChartOutlined />}>
+          <Link to="/admin/analytics">Thống kê</Link>
         </Menu.Item>
 
         {/* Quản lý sản phẩm */}

@@ -15,6 +15,7 @@ import OrderManage from "../pages/order/OrderManage";
 import BookManage from "../pages/book/BookManage";
 import BookFormPage from "../pages/book/BookFormPage";
 import BookDetail from "../pages/book/BookDetail";
+import Analytics from "../pages/Admin/Analytics";
 
 const AppRoutes = () => {
   return (
@@ -35,12 +36,15 @@ const AppRoutes = () => {
         <Route path="publishers" element={<PublisherManage />} />
         <Route path="receipts" element={<ReceiptManage />} />
 
+        <Route path="admin/analytics" element={<Analytics />} />
+
         <Route path="orders" element={<OrderManage />} />
         {/* <Route path="users" element={<UserManage />} /> */}
 
         {/* Default route */}
-        <Route index element={<Statistics />} />
-        
+        {/* <Route index element={<Statistics />} /> */}
+        <Route index element={<Analytics />} />
+
       </Route>
     </Routes>
   );

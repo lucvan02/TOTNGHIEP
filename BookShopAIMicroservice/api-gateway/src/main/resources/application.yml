@@ -39,7 +39,7 @@ spring:
             - id: order-service
               uri: lb://order-service
               predicates:
-                - Path=/api/orders/**, /api/carts/**, /api/reviews/**, /api/payments/**, /api/favorites/**, /api/admin/stats/**
+                - Path=/api/orders/**, /api/carts/**, /api/reviews/**, /api/payments/**, /api/favorites/**, /api/admin/stats/**, /api/admin/analytics/**
 
 
 eureka:

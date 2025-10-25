@@ -65,5 +65,9 @@ vnpay:
   returnUrl: http://localhost:8084/api/orders/vnpay-return  # url hoàn trả sau khi thanh toán
   apiUrl: https://sandbox.vnpayment.vn/merchant_webapi/api/transaction   # url hoàn trả kết quả giao dịch
 
+app:
+  frontendUrl: http://localhost:3000   # đổi nếu FE chạy domain khác
+
+
 
 
