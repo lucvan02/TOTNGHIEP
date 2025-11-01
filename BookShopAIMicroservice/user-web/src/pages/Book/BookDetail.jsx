@@ -17,6 +17,11 @@ import FavoriteButton from "../../components/favorite/FavoriteButton";
 import AddToCartButton from "../../components/cart/AddToCartButton";
 import ReviewSection from "./ReviewSection";
 
+import { recoApi } from "../../api/recoApi";
+import { Grid, Button } from "@mui/material"; // dùng Grid cho similar
+import BookCard from "../../components/BookCard"; // Card sách cho similar
+import Footer from "../../components/Footer/Footer";
+
 const money = (n) => (n ?? 0).toLocaleString() + "₫";
 
 export default function BookDetail() {
@@ -31,6 +36,9 @@ export default function BookDetail() {
 
   const notify = (type, msg) => setToast({ open: true, type, msg });
 
+  const [similar, setSimilar] = useState([]);
+  const [loadingSimilar, setLoadingSimilar] = useState(true);
+
   useEffect(() => {
     (async () => {
       try {
@@ -40,6 +48,35 @@ export default function BookDetail() {
         console.error(e);
       } finally {
         setLoading(false);
+      }
+    })();
+  }, [id]);
+
+   // === SIMILAR SECTION ===
+  useEffect(() => {
+    if (!id) return;
+    setLoadingSimilar(true);
+    (async () => {
+      try {
+        const res = await recoApi.similar(Number(id), 4);
+        // API trả { base, similar: [{book_id, title, score, breakdown}] }
+        const arr = res?.data?.similar || [];
+        const ids = arr.map((x) => x.book_id);
+        const details = await Promise.allSettled(ids.map((bid) => bookApi.getById(bid)));
+        const books = details
+          .filter((p) => p.status === "fulfilled" && p.value?.data?.data)
+          .map((p) => p.value.data.data);
+
+        // Sắp xếp theo score
+        const scoreMap = new Map(arr.map((x) => [x.book_id, x.score]));
+        books.sort((a, b) => (scoreMap.get(b.id) ?? 0) - (scoreMap.get(a.id) ?? 0));
+
+        setSimilar(books);
+      } catch (e) {
+        console.error("Lỗi similar:", e);
+        setSimilar([]);
+      } finally {
+        setLoadingSimilar(false);
       }
     })();
   }, [id]);
@@ -67,6 +104,7 @@ export default function BookDetail() {
     );
 
   return (
+    <>
     <Box
       p={5}
       display="flex"
@@ -195,6 +233,31 @@ export default function BookDetail() {
       {/* Reviews */}
       <ReviewSection bookId={Number(id)} initialAvg={avg} initialCount={count} />
 
+       {/* === KHỐI SÁCH TƯƠNG TỰ === */}
+      <Card sx={{ p: 3, borderRadius: 3, boxShadow: 2, backgroundColor: "#fff" }}>
+        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+          <Typography variant="h6">📚 Có thể bạn cũng thích</Typography>
+          {/* <Button size="small" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+            Lên đầu trang
+          </Button> */}
+        </Box>
+        {loadingSimilar ? (
+          <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+            <CircularProgress />
+          </Box>
+        ) : similar.length > 0 ? (
+          <Grid container spacing={2}>
+            {similar.map((b) => (
+              <Grid key={b.id} item xs={12} sm={6} md={4} lg={3}>
+                <BookCard book={b} />
+              </Grid>
+            ))}
+          </Grid>
+        ) : (
+          <Typography color="text.secondary">Chưa có dữ liệu tương tự cho sách này.</Typography>
+        )}
+      </Card>
+
       <Snackbar
         open={toast.open}
         autoHideDuration={2000}
@@ -205,5 +268,7 @@ export default function BookDetail() {
         </Alert>
       </Snackbar>
     </Box>
+    <Footer />
+    </>
   );
 }

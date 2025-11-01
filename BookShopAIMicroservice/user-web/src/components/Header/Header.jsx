@@ -62,8 +62,8 @@ export default function Header() {
           <Button color="inherit" onClick={() => navigate("/")}>
             Trang chủ
           </Button>
-          <Button color="inherit" onClick={() => navigate("/about")}>
-            Giới thiệu
+          <Button color="inherit" onClick={() => navigate("/recommend")}>
+            Gợi ý sách
           </Button>
           <Button
             color="inherit"

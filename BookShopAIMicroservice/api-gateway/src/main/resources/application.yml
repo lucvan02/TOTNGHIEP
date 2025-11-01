@@ -41,6 +41,11 @@ spring:
               predicates:
                 - Path=/api/orders/**, /api/carts/**, /api/reviews/**, /api/payments/**, /api/favorites/**, /api/admin/stats/**, /api/admin/analytics/**
 
+            - id: reco-service
+              uri: http://localhost:8000
+              predicates:
+                - Path=/cbf/**, /cb/**, /cf/**,
+
 
 eureka:
   client:
