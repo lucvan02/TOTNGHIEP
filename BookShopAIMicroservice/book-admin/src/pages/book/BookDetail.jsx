@@ -23,6 +23,9 @@ import categoryApi from "../../api/categoryApi";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 // import ReviewSection from "./ReviewSection";
+// import AdminReviewList from "./AdminReviewList";
+import AdminReviewSection from "./AdminReviewSection";
+
 
 const API_BASE = "http://localhost:8080";
 
@@ -108,6 +111,8 @@ const BookDetail = () => {
       message.error("Lỗi khi cập nhật");
     }
   };
+
+
 
   const fullImg = (img) =>
     img ? (img.startsWith("http") ? img : `${API_BASE}${img}`) : "";
@@ -230,6 +235,16 @@ const BookDetail = () => {
             </Button>
 
           </Card>
+
+          {/* <div style={{ marginTop: 40 }}>
+          <AdminReviewList bookId={Number(id)} />
+        </div> */}
+
+        <div style={{ marginTop: 40 }}>
+        <AdminReviewSection bookId={Number(id)} />
+      </div>
+
+
 
           {/* Modal chỉnh sửa */}
           <Modal
@@ -380,12 +395,10 @@ const BookDetail = () => {
         </>
       )}
 
-      {/* <ReviewSection bookId={id} initialAvg={initialAvg} initialCount={initialCount} /> */}
+
     </div>
 
-    
-    /* Reviews tách ra component riêng */
-      // <ReviewSection bookId={Number(id)} initialAvg={avg} initialCount={count} />
+
   );
 };
 

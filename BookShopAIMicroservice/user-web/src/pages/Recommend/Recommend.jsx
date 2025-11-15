@@ -89,7 +89,7 @@ export default function Recommend() {
               Làm mới
             </Button>
             {/* Tùy chọn: gọi POST /cbf/reload nếu vừa thêm sách/thuộc tính mới */}
-            {/* <Button size="small" onClick={() => recoApi.reload()}>Reload vectors</Button> */}
+            <Button size="small" onClick={() => recoApi.reload()}>Reload vectors</Button>
           </Box>
         </Box>
         <Divider sx={{ mb: 3 }} />

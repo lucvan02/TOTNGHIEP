@@ -57,6 +57,12 @@ public class OrderService {
         Order o = get(orderId);
         OrderStatus next = OrderStatus.valueOf(req.getStatus().toUpperCase());
 
+        //nếu chuyển sang pending thì set createdAt lại
+        if (next == OrderStatus.PENDING) {
+            o.setCreatedAt(LocalDateTime.now());
+            // giữ nguyên updatedAt để thể hiện thời điểm cập nhật trạng thái
+        }
+
         if (next == OrderStatus.CANCELLED) {
             // chỉ cho hủy khi chưa hoàn tất
             if (o.getStatus() == OrderStatus.COMPLETED)

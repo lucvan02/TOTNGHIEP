@@ -121,7 +121,7 @@ public class AdminOrderService {
                 bookClient.decreaseStock(it.getBookId(), it.getQuantity()*-1);
             }
 
-            // ✅ tự động hoàn tiền nếu ONLINE và đã thanh toán
+            // tự động hoàn tiền nếu ONLINE và đã thanh toán
             if (Boolean.TRUE.equals(o.getPaymentStatus()) && o.getPaymentMethod() == PaymentMethod.ONLINE) {
                 boolean ok = vnpayRefundService.refundFull(o, "Cancel order " + o.getId());
                 System.out.println("[VNPay][REFUND][AUTO] order=" + o.getId() + " result=" + ok);
@@ -131,7 +131,7 @@ public class AdminOrderService {
 //                }
             }
 
-            // gửi email hủy như bạn đã làm...
+            // gửi email hủy
             var user = userClient.getContact(o.getBuyerId());
             mailService.sendOrderCancelled(user.getEmail(), user.getFullName(), o.getId(), req.getCancelReason());
         }
