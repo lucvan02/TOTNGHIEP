@@ -292,6 +292,7 @@ export default function OrderDetail() {
           <Table size="small">
             <TableHead>
               <TableRow>
+                {/* //sửa để click vào ảnh thì đến trang chi tiết sách */}
                 <TableCell>Ảnh</TableCell>
                 <TableCell>Tên sách</TableCell>
                 <TableCell align="right">Giá</TableCell>

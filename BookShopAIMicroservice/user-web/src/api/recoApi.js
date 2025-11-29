@@ -1,29 +1,3 @@
-// // NOTE: nếu bạn đã route qua API Gateway thì sửa BASE_PATH tương ứng:
-// //   - Qua gateway:   const BASE_PATH = "/cbf";           // ví dụ gateway map /cbf -> reco-service
-// //   - Trực tiếp FE->FastAPI: dùng full URL từ .env: VITE_RECO_BASE=https://localhost:8000/cbf
-// // const BASE_PATH = import.meta.env.VITE_RECO_BASE || "/cbf";
-// const BASE_PATH = "http://localhost:8000/cbf";
-
-// import axios from "axios";
-// // import axiosClient from "./axiosClient";
-
-
-// export const recoApi = {
-//   recommend: (userId, topK = 3, excludePurchased = true) =>
-//     axios.get(`${BASE_PATH}/recommend`, {
-//       params: { user_id: userId, top_k: topK, exclude_purchased: excludePurchased },
-//     }),
-
-//   similar: (bookId, topK = 3) =>
-//     axios.get(`${BASE_PATH}/similar`, {
-//       params: { book_id: bookId, top_k: topK },
-//     }),
-// };
-
-
-
-
-
 import axios from "axios";
 
 // Có thể đưa BASE_PATH vào .env: VITE_RECO_BASE_URL=http://localhost:8000/cbf
