@@ -3,12 +3,16 @@ package com.bookwebAI.user_service.service;
 import com.bookwebAI.user_service.dto.*;
 import com.bookwebAI.user_service.entity.User;
 import com.bookwebAI.user_service.entity.VerificationToken;
+import com.bookwebAI.user_service.mapper.UserMapper;
 import com.bookwebAI.user_service.repository.UserRepository;
 import com.bookwebAI.user_service.repository.VerificationTokenRepository;
 import com.bookwebAI.user_service.security.JwtUtil;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +22,11 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.*;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.util.*;
 
@@ -31,6 +40,8 @@ public class UserService {
     private final PasswordEncoder encoder;
     private final JwtUtil jwtUtil;
     private final RestTemplate restTemplate = new RestTemplate();
+
+    private final UserMapper userMapper;
 
     @Value("${google.client.id}")
     private String clientId;
@@ -271,5 +282,80 @@ public class UserService {
     //hàm tìm user theo uid
     public User findByUid(String uid) {
         return repo.findByUid(uid).orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+
+    // Lấy danh sách khách hàng cho trang admin (có phân trang, search)
+    public ApiResponse<Page<UserResponseDto>> getUsersForAdmin(
+            int page,
+            int size,
+            String keyword
+    ) {
+        // đây là Pageable của Spring Data
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "uid"));
+        // nếu có createdAt thì sửa "uid" thành "createdAt"
+
+        Page<User> userPage;
+        if (keyword != null && !keyword.isBlank()) {
+            userPage = repo.searchUsersForAdmin(keyword.trim(), pageable);
+        } else {
+            userPage = repo.findByRole("USER", pageable);
+        }
+
+        Page<UserResponseDto> dtoPage = userPage.map(userMapper::toResponseDto);
+
+        return ApiResponse.<Page<UserResponseDto>>builder()
+                .message("Lấy danh sách người dùng thành công")
+                .data(dtoPage)
+                .build();
+    }
+
+
+    // Khóa tài khoản
+    @Transactional
+    public ApiResponse<Void> lockUser(String uid) {
+        User user = repo.findByUid(uid)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+            throw new RuntimeException("Không thể khóa tài khoản ADMIN");
+        }
+
+        user.setActive(false);
+        repo.save(user);
+
+        return ApiResponse.<Void>builder()
+                .message("Khóa tài khoản thành công")
+                .data(null)
+                .build();
+    }
+
+    // Mở khóa tài khoản
+    @Transactional
+    public ApiResponse<Void> unlockUser(String uid) {
+        User user = repo.findByUid(uid)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setActive(true);
+        repo.save(user);
+
+        return ApiResponse.<Void>builder()
+                .message("Mở khóa tài khoản thành công")
+                .data(null)
+                .build();
+    }
+
+
+    public ApiResponse<List<UserResponseDto>> getAllUsersForAdmin() {
+        List<User> users = repo.findAll(); // TẠM THỜI: lấy hết, không lọc
+
+        List<UserResponseDto> dtos = users.stream()
+                .map(userMapper::toResponseDto)
+                .toList();
+
+        return ApiResponse.<List<UserResponseDto>>builder()
+                .message("Lấy danh sách tất cả người dùng thành công")
+                .data(dtos)
+                .build();
     }
 }

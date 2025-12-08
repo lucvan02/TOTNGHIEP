@@ -14,4 +14,8 @@ export const adminOrderApi = {
   // set paymentStatus (true/false)
   setPayment: (orderId, paid) =>
     axios.put(`${BASE}/api/orders/${orderId}/payment`, null, { params: { paid } }),
+
+  getHistoryByUser: (uid) =>
+    axios.get(`${BASE}/api/orders/${encodeURIComponent(uid)}/history`),
+
 };

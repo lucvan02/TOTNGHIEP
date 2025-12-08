@@ -9,7 +9,7 @@ import CategoryManage from "../pages/category/CategoryManage";
 import PublisherManage from "../pages/publisher/PublisherManage";
 import ReceiptManage from "../pages/recepit/ReceiptManage";
 import OrderManage from "../pages/order/OrderManage";
-// import UserManage from "../pages/user/UserManage";
+import UserManage from "../pages/user/UserManage";
 // import BookList from "../pages/book/BookList";
 // import BookForm from "../pages/book/BookForm";
 import BookManage from "../pages/book/BookManage";
@@ -39,7 +39,7 @@ const AppRoutes = () => {
         <Route path="admin/analytics" element={<Analytics />} />
 
         <Route path="orders" element={<OrderManage />} />
-        {/* <Route path="users" element={<UserManage />} /> */}
+        <Route path="users" element={<UserManage />} />
 
         {/* Default route */}
         {/* <Route index element={<Statistics />} /> */}
