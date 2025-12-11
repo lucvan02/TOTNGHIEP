@@ -77,6 +77,11 @@ const Sidebar = () => {
           <Link to="/users">Quản lý người dùng</Link>
         </Menu.Item>
 
+        {/* Quản lý Chatbot */}
+        <Menu.Item key="/chatbot" icon={<FileTextOutlined />}>
+          <Link to="/chatbot">Quản lý Chatbot</Link>
+        </Menu.Item>
+
         {/* Đăng xuất */}
         <Menu.Item key="/logout" icon={<LogoutOutlined />}>
           <Link to="/login">Đăng xuất</Link>

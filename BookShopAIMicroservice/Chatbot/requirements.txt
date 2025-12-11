@@ -12,3 +12,6 @@ sentence-transformers
 pymysql
 langchain-huggingface
 langchain-google-genai
+pypdf
+unstructured
+python-multipart

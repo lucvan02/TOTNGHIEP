@@ -303,11 +303,7 @@
 
 
 
-
-
-
-/* src/components/ChatWidget.css */
-
+/* ChaWiget.css */
 .chat-toggle {
   position: fixed;
   right: 24px;
@@ -371,7 +367,7 @@
   color: #f97316;
 }
 
-/* Tabs */
+
 
 .chat-tabs {
   display: flex;
@@ -400,7 +396,7 @@
   background: #111827;
 }
 
-/* Body */
+
 
 .chat-body {
   flex: 1;
@@ -450,7 +446,6 @@
   opacity: 0.9;
 }
 
-/* Input */
 
 .chat-input {
   display: flex;
@@ -496,7 +491,6 @@
   cursor: default;
 }
 
-/* ... các phần cũ giữ nguyên ... */
 
 .chat-body {
   flex: 1;
@@ -561,7 +555,6 @@
   opacity: 0.9;
 }
 
-/* Book cards */
 
 .book-list {
   display: flex;
@@ -664,4 +657,11 @@
 .book-card-link:hover {
   color: #0ea5e9;
 }
+ 
+
+
+
+
+
+
 

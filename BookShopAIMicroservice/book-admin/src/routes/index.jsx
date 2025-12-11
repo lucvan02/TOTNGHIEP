@@ -16,6 +16,7 @@ import BookManage from "../pages/book/BookManage";
 import BookFormPage from "../pages/book/BookFormPage";
 import BookDetail from "../pages/book/BookDetail";
 import Analytics from "../pages/Admin/Analytics";
+import ChatbotManage from "../pages/Chatbot/ChatbotManage";
 
 const AppRoutes = () => {
   return (
@@ -40,6 +41,7 @@ const AppRoutes = () => {
 
         <Route path="orders" element={<OrderManage />} />
         <Route path="users" element={<UserManage />} />
+        <Route path="chatbot" element={<ChatbotManage />} />
 
         {/* Default route */}
         {/* <Route index element={<Statistics />} /> */}

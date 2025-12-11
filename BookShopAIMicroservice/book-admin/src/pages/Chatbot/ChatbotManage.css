@@ -1,0 +1,15 @@
+/* src/components/ChatbotManage.css */
+.chatbot-manage { font-family: Arial, sans-serif; padding: 16px; max-width: 1000px; margin: 0 auto; }
+.panel { border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px; background: #fff; }
+.panel + .panel { margin-top: 12px; }
+.panel-head { display:flex; align-items:center; margin-bottom:8px; }
+.panel-body { padding-top: 6px; }
+.policy-table { width:100%; border-collapse:collapse; margin-top:8px; }
+.policy-table th, .policy-table td { border-bottom:1px solid #f0f0f0; padding:8px; text-align:left; }
+.empty { color:#666; padding:12px 0; }
+.error-box { background:#ffe8e8; color:#9b1c1c; padding:8px; border-radius:4px; margin-bottom:8px; }
+.message-box { background:#e8fff0; color:#0b6b3a; padding:8px; border-radius:4px; margin-bottom:8px; }
+.upload-form { display:flex; align-items:center; }
+.filename { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:420px; display:inline-block; }
+button { padding:6px 10px; border-radius:4px; border:1px solid #ccc; background:#fafafa; cursor:pointer; }
+button:disabled { opacity:0.6; cursor:not-allowed; }
