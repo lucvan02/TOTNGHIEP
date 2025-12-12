@@ -1,420 +1,14 @@
-# import os
-# import shutil
-# import asyncio
-# from pathlib import Path
-# from typing import List, Optional
-# import time
-
-# from fastapi import FastAPI, File, UploadFile, HTTPException
-# from fastapi.middleware.cors import CORSMiddleware
-# from pydantic import BaseModel
-# from dotenv import load_dotenv
-
-# from langchain_chroma import Chroma
-# from langchain_huggingface import HuggingFaceEmbeddings
-# from langchain_google_genai import ChatGoogleGenerativeAI
-
-# from langchain_core.prompts import ChatPromptTemplate
-# from langchain_core.output_parsers import StrOutputParser
-# from langchain_core.runnables import RunnablePassthrough
-
-# # Thư viện cần thiết cho việc upload file (multipart/form-data)
-# # Cần chạy: pip install python-multipart
-# # Cần chạy: pip install unstructured (để xử lý file trong ingest_data.py)
-
-# # Import hàm Ingestion từ file đã sửa
-# from .ingest_data import run_ingestion 
-
-# # =========================
-# # LOAD ENV & CONSTANTS
-# # =========================
-
-# BASE_DIR = Path(__file__).resolve().parent.parent
-# DOTENV_PATH = BASE_DIR / ".env"
-# load_dotenv(dotenv_path=DOTENV_PATH)
-
-# # Phải khớp với ingest_data.py
-# PERSIST_DIR = str(BASE_DIR / "chroma_data")
-# COLLECTION_NAME = "general_knowledge"
-# EMBEDDING_MODEL_NAME = os.getenv(
-#     "EMBEDDING_MODEL_NAME",
-#     "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-# )
-# FILE_DATA_DIR = BASE_DIR / "data" / "policy"
-
-# GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-# if not GOOGLE_API_KEY:
-#     print("⚠️  Thiếu GOOGLE_API_KEY trong .env, endpoint /chat sẽ lỗi nếu gọi LLM.")
-
-# # =========================
-# # GLOBAL STATES & LOCKS
-# # =========================
-
-# embeddings = None
-# vectorstore = None
-# retriever = None
-
-# # Khóa để đảm bảo chỉ có 1 quá trình Ingest chạy cùng lúc
-# INGEST_LOCK = asyncio.Lock()
-
-
-# # =========================
-# # EMBEDDINGS + VECTORSTORE LOGIC
-# # =========================
-
-# def get_embeddings():
-#     global embeddings
-#     if embeddings is None:
-#         print(f"Khởi tạo HuggingFaceEmbeddings (service): {EMBEDDING_MODEL_NAME}")
-#         embeddings = HuggingFaceEmbeddings(
-#             model_name=EMBEDDING_MODEL_NAME,
-#             model_kwargs={"device": "cpu"},
-#             encode_kwargs={"normalize_embeddings": True},
-#         )
-#     return embeddings
-
-# def load_vectorstore_and_retriever():
-#     """Tải Vectorstore và cập nhật Retriever."""
-#     global vectorstore, retriever
-    
-#     embed_func = get_embeddings()
-    
-#     # Kiểm tra sự tồn tại của Vector DB
-#     if not Path(PERSIST_DIR).is_dir() or not any(Path(PERSIST_DIR).iterdir()):
-#         print(f"⚠️ Vector DB chưa tồn tại tại {PERSIST_DIR}. Đang khởi tạo vectorstore rỗng.")
-#         vectorstore = Chroma(
-#             embedding_function=embed_func,
-#             persist_directory=PERSIST_DIR,
-#             collection_name=COLLECTION_NAME,
-#         )
-#     else:
-#         print("Đang tải Vectorstore Chroma hiện tại...")
-#         vectorstore = Chroma(
-#             embedding_function=embed_func,
-#             persist_directory=PERSIST_DIR,
-#             collection_name=COLLECTION_NAME,
-#         )
-    
-#     retriever = vectorstore.as_retriever(search_kwargs={"k": 8})
-#     print("Vectorstore và Retriever đã sẵn sàng.")
-
-# # Khởi tạo Vectorstore/Retriever khi service khởi động
-# load_vectorstore_and_retriever()
-
-
-# # =========================
-# # LLM GEMINI + RAG CHAIN LOGIC
-# # =========================
-
-# def get_gemini_llm():
-#     if not GOOGLE_API_KEY:
-#         return None
-
-#     llm = ChatGoogleGenerativeAI(
-#         model="gemini-2.5-flash-lite",
-#         temperature=0.2,
-#     )
-#     print("Đã khởi tạo LLM Gemini: gemini-2.5-flash-lite")
-#     return llm
-
-# llm_gemini = get_gemini_llm()
-
-
-# def build_rag_chain(llm):
-#     """
-#     Tạo RAG chain sử dụng retriever + Gemini LLM.
-#     """
-#     template = """
-# Bạn là trợ lý tư vấn và hỗ trợ khách hàng cho một nhà sách online.
-
-# Bạn được cung cấp thông tin liên quan trong phần CONTEXT bên dưới.
-# CONTEXT có thể bao gồm:
-# 1. **Danh sách SÁCH:** Tiêu đề, tác giả, thể loại, giá, đánh giá, tồn kho, mô tả,...
-# 2. **Các tài liệu Chính sách, FAQ** (ví dụ: chính sách đổi trả, quy định bảo mật).
-
-# ---------------------- CONTEXT ----------------------
-# {context}
-# -----------------------------------------------------
-
-# Câu hỏi / yêu cầu của khách: {question}
-
-# YÊU CẦU TRẢ LỜI:
-# - Dựa CHỦ YẾU vào thông tin trong CONTEXT.
-# - **Nếu khách hỏi về sách/gợi ý sách:**
-#     + Hãy chọn 3–5 quyển phù hợp nhất từ CONTEXT (nếu có).
-#     + Mỗi sách ghi rõ: tên, tác giả, thể loại chính, giá (xấp xỉ), đối tượng phù hợp.
-# - **Nếu khách hỏi về Chính sách/FAQ:**
-#     + Tóm tắt và trả lời dựa trên nội dung trong CONTEXT.
-# - Nếu CONTEXT không chứa thông tin phù hợp:
-#     + Hãy nói rõ là bạn chưa có dữ liệu trong hệ thống hiện tại.
-#     + Gợi ý khách dùng tính năng tìm kiếm hoặc liên hệ CSKH.
-
-# Luôn trả lời bằng TIẾNG VIỆT, giọng thân thiện, rõ ràng.
-# """
-
-#     prompt = ChatPromptTemplate.from_template(template)
-
-#     # Sử dụng lambda để đảm bảo retriever được gọi với input dictionary
-#     # và sử dụng đối tượng retriever mới nhất (global)
-#     rag_chain = (
-#         {
-#             "context": lambda x: retriever.invoke(x["question"]),
-#             "question": RunnablePassthrough(),
-#         }
-#         | prompt
-#         | llm
-#         | StrOutputParser()
-#     )
-#     return rag_chain
-
-
-# rag_chain = build_rag_chain(llm_gemini) if llm_gemini is not None else None
-
-
-# # =========================
-# # SCHEMAS (Pydantic Models)
-# # =========================
-
-# class RecommendRequest(BaseModel):
-#     query: str
-
-
-# class BookOut(BaseModel):
-#     book_id: Optional[int] = None
-#     title: Optional[str] = None
-#     authors: Optional[str] = None
-#     categories: Optional[str] = None
-#     publisher: Optional[str] = None
-#     price: Optional[float] = None
-#     star: Optional[float] = None
-#     stock: Optional[int] = None
-#     image: Optional[str] = None
-#     reason: Optional[str] = None
-#     short_description: Optional[str] = None
-
-
-# class RecommendResponse(BaseModel):
-#     books: List[BookOut]
-
-
-# class ChatRequest(BaseModel):
-#     question: str
-
-
-# class ChatResponse(BaseModel):
-#     answer: str
-
-# class IngestResponse(BaseModel):
-#     status: str
-#     message: str
-#     time_taken: float = 0.0
-
-
-# # =========================
-# # FASTAPI APP
-# # =========================
-
-# app = FastAPI(title="BookShopAI Service (HF Embedding + Gemini LLM)")
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
-
-# # ---------- HÀM CHUNG ĐỂ RELOAD RETRIEVER SAU INGEST ----------
-# async def reload_retriever_from_ingest():
-#     """Thực hiện quá trình Ingest (tốn thời gian) và cập nhật Retriever."""
-#     global vectorstore, retriever
-    
-#     # Đảm bảo chỉ 1 tiến trình ingest chạy cùng lúc
-#     async with INGEST_LOCK:
-#         print("Bắt đầu quá trình Ingest toàn bộ dữ liệu (MySQL + Files)...")
-#         start_time = time.time()
-        
-#         try:
-#             # Chạy hàm ingest đã được import
-#             # Sử dụng asyncio.to_thread để chạy hàm blocking (I/O) trên một luồng khác
-#             new_vectorstore = await asyncio.to_thread(run_ingestion)
-            
-#             if new_vectorstore:
-#                 # Cập nhật global vectorstore và retriever mới
-#                 vectorstore = new_vectorstore
-#                 retriever = vectorstore.as_retriever(search_kwargs={"k": 8})
-#                 time_taken = time.time() - start_time
-#                 return IngestResponse(
-#                     status="success", 
-#                     message="Ingest thành công, Retriever đã được cập nhật.",
-#                     time_taken=time_taken
-#                 )
-#             else:
-#                 time_taken = time.time() - start_time
-#                 return IngestResponse(
-#                     status="warning", 
-#                     message="Ingest hoàn tất nhưng không có dữ liệu để nhúng.",
-#                     time_taken=time_taken
-#                 )
-
-#         except Exception as e:
-#             time_taken = time.time() - start_time
-#             print(f"Lỗi trong quá trình Ingest: {e}")
-#             raise HTTPException(status_code=500, detail=f"Lỗi Ingest dữ liệu: {e}")
-
-
-# # ---------- /recommend: Vector search đơn giản ----------
-
-# @app.post("/recommend", response_model=RecommendResponse, tags=["Book Search"])
-# async def recommend(req: RecommendRequest):
-#     """
-#     Dùng vector search lấy top-k sách gần nhất, không gọi LLM.
-#     Chỉ trả về các document có source là sách.
-#     """
-#     # Sử dụng retriever global
-#     docs = retriever.invoke(req.query)
-
-#     if not docs:
-#         return RecommendResponse(books=[])
-
-#     books: List[BookOut] = []
-
-#     for idx, d in enumerate(docs):
-#         m = d.metadata
-        
-#         # Chỉ trả về BookOut nếu nguồn là sách (mysql_book)
-#         if m.get("source") != "mysql_book":
-#             continue
-
-#         if len(books) >= 3: # Giới hạn 3 cuốn sách
-#              break
-
-#         title = m.get("title")
-#         authors = m.get("authors") or "Không rõ tác giả"
-#         categories = m.get("categories") or "Không rõ thể loại"
-#         price = m.get("price")
-#         star = m.get("star")
-
-#         reason = f"Sách này có nội dung/thể loại gần với yêu cầu: \"{req.query}\"."
-#         short_desc = (
-#             f"\"{title}\" thuộc {categories}, phù hợp với chủ đề bạn đang tìm."
-#         )
-
-#         books.append(
-#             BookOut(
-#                 book_id=m.get("book_id"),
-#                 title=title,
-#                 authors=authors,
-#                 categories=categories,
-#                 publisher=m.get("publisher"),
-#                 price=price,
-#                 star=star,
-#                 stock=m.get("stock"),
-#                 image=m.get("image"),
-#                 reason=reason,
-#                 short_description=short_desc,
-#             )
-#         )
-
-#     return RecommendResponse(books=books)
-
-
-# # ---------- /chat: RAG + Gemini LLM ----------
-
-# @app.post("/chat", response_model=ChatResponse, tags=["Chatbot"])
-# async def chat(req: ChatRequest):
-#     """
-#     Logic: Dùng retriever lấy context sách và policy liên quan, sau đó cho Gemini RAG trả lời.
-#     """
-#     # Sử dụng rag_chain global
-#     if rag_chain is None:
-#         return ChatResponse(
-#             answer="Hiện tại dịch vụ LLM (Gemini) chưa được cấu hình GOOGLE_API_KEY. "
-#                    "Hãy liên hệ admin để cấu hình khóa API."
-#         )
-
-#     try:
-#         # Gọi invoke với dictionary input
-#         answer = rag_chain.invoke({"question": req.question}) 
-#     except Exception as e:
-#         print(f"Lỗi LLM: {e}")
-#         answer = f"Đã xảy ra lỗi khi gọi mô hình LLM: {e}"
-
-#     return ChatResponse(answer=answer)
-
-
-# # -------------------------------------------------------------------
-# # ---------- API MỚI 1: POST /ingest (Reload Toàn Bộ Dữ liệu) ----------
-# # -------------------------------------------------------------------
-
-# @app.post("/ingest", response_model=IngestResponse, tags=["Admin"])
-# async def reload_data():
-#     """
-#     Kích hoạt việc tải lại toàn bộ Vector DB từ MySQL và thư mục file.
-#     """
-#     return await reload_retriever_from_ingest()
-
-# # -------------------------------------------------------------------
-# # ---------- API MỚI 2: POST /upload_file (Upload File Tài liệu) ----------
-# # -------------------------------------------------------------------
-
-# @app.post("/upload_file", response_model=IngestResponse, tags=["Admin"])
-# async def upload_document(
-#     file: UploadFile = File(...)
-# ):
-#     """
-#     Tải file tài liệu (chính sách, FAQ) lên và kích hoạt Ingest sau đó.
-#     Chỉ chấp nhận các loại file đã được cấu hình trong ingest_data.py (txt, pdf).
-#     """
-    
-#     # Kiểm tra loại file cơ bản
-#     allowed_extensions = ['.txt', '.pdf', '.md']
-#     file_ext = Path(file.filename).suffix.lower()
-    
-#     if file_ext not in allowed_extensions:
-#         raise HTTPException(
-#             status_code=400, 
-#             detail=f"Chỉ chấp nhận các file có định dạng: {', '.join(allowed_extensions)}"
-#         )
-    
-#     # Dùng tên file gốc
-#     upload_path = Path(FILE_DATA_DIR) / file.filename
-    
-#     try:
-#         # 1. Đảm bảo thư mục tồn tại và lưu file
-#         FILE_DATA_DIR.mkdir(parents=True, exist_ok=True)
-        
-#         # Ghi nội dung file
-#         with upload_path.open("wb") as buffer:
-#             shutil.copyfileobj(file.file, buffer)
-        
-#         print(f"Đã lưu file: {upload_path}")
-        
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Lỗi khi lưu file: {e}")
-
-#     # 2. Sau khi lưu file, kích hoạt Ingest toàn bộ dữ liệu để cập nhật Vector DB
-#     return await reload_retriever_from_ingest()
-
-
-
-
-
-
-
-
-
-
-
+# main.py
 import os
 import shutil
 import asyncio
+import time
+import logging
+import gc
 from pathlib import Path
 from typing import List, Optional
-import time
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -428,10 +22,15 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 
-# Import hàm Ingestion từ file đã sửa
-from .ingest_data import run_ingestion 
-# Import ngoại lệ để xử lý lỗi tài nguyên hết quota Gemini
-# from google.api_core.exceptions import ResourceExhaustedError
+# Dùng loader để extract PDF/text khi admin yêu cầu xem nội dung
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
+
+# Import hàm Ingestion và hằng số từ ingest_data (file ingest_data.py đã được chỉnh sửa)
+from .ingest_data import run_ingestion
+
+# Logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 # =========================
 # LOAD ENV & CONSTANTS
@@ -451,7 +50,7 @@ FILE_DATA_DIR = BASE_DIR / "data" / "policy"
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-# Cấu hình ngưỡng điểm (Threshold) cho gợi ý (0.0 đến 1.0)
+# Cấu hình ngưỡng điểm (Threshold) cho gợi ý (giá trị dùng trong similarity score)
 SCORE_THRESHOLD = 1.05
 
 # =========================
@@ -487,7 +86,12 @@ def load_vectorstore_and_retriever():
     
     if not Path(PERSIST_DIR).is_dir() or not any(Path(PERSIST_DIR).iterdir()):
         print(f"⚠️ Vector DB chưa tồn tại tại {PERSIST_DIR}. Đang khởi tạo vectorstore rỗng.")
-        vectorstore = Chroma(embedding_function=embed_func)
+        # tạo Chroma empty (một số phiên bản choma require persist_directory arg)
+        try:
+            vectorstore = Chroma(embedding_function=embed_func, persist_directory=PERSIST_DIR, collection_name=COLLECTION_NAME)
+        except Exception:
+            # fallback nếu signature khác
+            vectorstore = Chroma(embedding_function=embed_func)
     else:
         print("Đang tải Vectorstore Chroma hiện tại...")
         vectorstore = Chroma(
@@ -499,7 +103,11 @@ def load_vectorstore_and_retriever():
     retriever = vectorstore.as_retriever(search_kwargs={"k": 8})
     print("Vectorstore và Retriever đã sẵn sàng.")
 
-load_vectorstore_and_retriever()
+# Tải vectorstore khi khởi động
+try:
+    load_vectorstore_and_retriever()
+except Exception as e:
+    logger.exception("Lỗi khi load vectorstore lúc khởi động: %s", e)
 
 
 # =========================
@@ -665,43 +273,76 @@ app.add_middleware(
 
 
 # ---------- HÀM CHUNG ĐỂ RELOAD RETRIEVER SAU INGEST ----------
+# async def reload_retriever_from_ingest():
+#     # ... (Logic giữ nguyên)
+#     global vectorstore, retriever
+    
+#     async with INGEST_LOCK:
+#         print("Bắt đầu quá trình Ingest toàn bộ dữ liệu (MySQL + Files)...")
+#         start_time = time.time()
+        
+#         try:
+#             new_vectorstore = await asyncio.to_thread(run_ingestion)
+            
+#             if new_vectorstore:
+#                 vectorstore = new_vectorstore
+#                 retriever = vectorstore.as_retriever(search_kwargs={"k": 8})
+#                 time_taken = time.time() - start_time
+#                 return IngestResponse(
+#                     status="success", 
+#                     message="Ingest thành công, Retriever đã được cập nhật.",
+#                     time_taken=time_taken
+#                 )
+#             else:
+#                 time_taken = time.time() - start_time
+#                 return IngestResponse(
+#                     status="warning", 
+#                     message="Ingest hoàn tất nhưng không có dữ liệu để nhúng.",
+#                     time_taken=time_taken
+#                 )
+
+#         except Exception as e:
+#             time_taken = time.time() - start_time
+#             print(f"Lỗi trong quá trình Ingest: {e}")
+#             raise HTTPException(status_code=500, detail=f"Lỗi Ingest dữ liệu: {e}")
+
+
+
+
+
 async def reload_retriever_from_ingest():
-    # ... (Logic giữ nguyên)
     global vectorstore, retriever
     
     async with INGEST_LOCK:
-        print("Bắt đầu quá trình Ingest toàn bộ dữ liệu (MySQL + Files)...")
+        print("Bắt đầu quá trình Ingest...")
         start_time = time.time()
         
         try:
+            # GIẢI PHÓNG BIẾN TOÀN CỤC TRƯỚC KHI INGEST
+            # Điều này giúp đóng connection tới SQLite của Chroma
+            vectorstore = None
+            retriever = None
+            gc.collect() 
+            await asyncio.sleep(1) 
+
+            # Thực hiện ingest ở luồng riêng
             new_vectorstore = await asyncio.to_thread(run_ingestion)
             
             if new_vectorstore:
                 vectorstore = new_vectorstore
                 retriever = vectorstore.as_retriever(search_kwargs={"k": 8})
-                time_taken = time.time() - start_time
-                return IngestResponse(
-                    status="success", 
-                    message="Ingest thành công, Retriever đã được cập nhật.",
-                    time_taken=time_taken
-                )
-            else:
-                time_taken = time.time() - start_time
-                return IngestResponse(
-                    status="warning", 
-                    message="Ingest hoàn tất nhưng không có dữ liệu để nhúng.",
-                    time_taken=time_taken
-                )
-
+                return IngestResponse(status="success", message="Đã xóa cũ và nạp mới thành công.", time_taken=time.time()-start_time)
+            
         except Exception as e:
-            time_taken = time.time() - start_time
-            print(f"Lỗi trong quá trình Ingest: {e}")
-            raise HTTPException(status_code=500, detail=f"Lỗi Ingest dữ liệu: {e}")
+            logger.error(f"Lỗi Ingest: {e}")
+            # Nếu lỗi, cố gắng load lại bản cũ để chatbot không chết
+            load_vectorstore_and_retriever()
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 # ---------- /recommend: Vector search đơn giản VÀ LỌC THEO ĐIỂM ----------
 
-@app.post("/recommend", response_model=RecommendResponse, tags=["Book Search"])
+@app.post("/chatbot/recommend", response_model=RecommendResponse, tags=["Book Search"])
 async def recommend(req: RecommendRequest):
     """
     Dùng vector search lấy top-k sách gần nhất và LỌC theo SCORE_THRESHOLD (0.82).
@@ -774,32 +415,9 @@ async def recommend(req: RecommendRequest):
     return RecommendResponse(books=books, message=f"Gợi ý {len(books)} sách phù hợp với yêu cầu.")
 
 
-# ---------- /chat: RAG + Gemini LLM (CÓ LỊCH SỬ CHAT) ----------
-
-# @app.post("/chat", response_model=ChatResponse, tags=["Chatbot"])
-# async def chat(req: ChatRequest):
-#     """
-#     Logic: Contextualize câu hỏi bằng lịch sử chat, sau đó dùng RAG để trả lời.
-#     """
-#     if rag_chain is None:
-#         return ChatResponse(
-#             answer="Hiện tại dịch vụ LLM (Gemini) chưa được cấu hình GOOGLE_API_KEY. "
-#                    "Hãy liên hệ admin để cấu hình khóa API."
-#         )
-
-#     try:
-#         # Gọi invoke, truyền cả question VÀ history (theo schema mới)
-#         answer = rag_chain.invoke({"question": req.question, "history": req.history}) 
-#     except Exception as e:
-#         print(f"Lỗi LLM: {e}")
-#         answer = f"Đã xảy ra lỗi khi gọi mô hình LLM: {e}"
-
-#     return ChatResponse(answer=answer)
-
-
 
 # ---------- /chat: RAG + Gemini LLM (CÓ lịch sử chat và BẮT LỖI QUOTA) ----------
-@app.post("/chat", response_model=ChatResponse, tags=["Chatbot"])
+@app.post("/chatbot/chat", response_model=ChatResponse, tags=["Chatbot"])
 async def chat(req: ChatRequest):
     """
     Logic: Contextualize câu hỏi bằng lịch sử chat, sau đó dùng RAG để trả lời.
@@ -840,15 +458,19 @@ async def chat(req: ChatRequest):
 
 # ---------- API Admin (Ingest/Upload) ----------
 
-@app.post("/ingest", response_model=IngestResponse, tags=["Admin"])
-async def reload_data():
-    return await reload_retriever_from_ingest()
+# sanitize filename helper
+def secure_filename(name: str) -> str:
+    name = Path(name).name
+    import re
+    return re.sub(r'[^A-Za-z0-9_.-]', '_', name)
 
-@app.post("/upload_file", response_model=IngestResponse, tags=["Admin"])
+
+@app.post("/chatbot/upload_file", response_model=IngestResponse, tags=["Admin"])
 async def upload_document(
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = None
 ):
-    # Logic giữ nguyên
+    # Logic giữ nguyên nhưng sanitize filename và chạy ingest nền
     allowed_extensions = ['.txt', '.pdf', '.md']
     file_ext = Path(file.filename).suffix.lower()
     
@@ -858,10 +480,13 @@ async def upload_document(
             detail=f"Chỉ chấp nhận các file có định dạng: {', '.join(allowed_extensions)}"
         )
     
-    upload_path = Path(FILE_DATA_DIR) / file.filename
+    # Use safe filename + timestamp
+    FILE_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    # safe_name = f"{int(time.time())}_{secure_filename(file.filename)}"
+    safe_name = secure_filename(file.filename)
+    upload_path = Path(FILE_DATA_DIR) / safe_name
     
     try:
-        FILE_DATA_DIR.mkdir(parents=True, exist_ok=True)
         with upload_path.open("wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         print(f"Đã lưu file: {upload_path}")
@@ -869,13 +494,16 @@ async def upload_document(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Lỗi khi lưu file: {e}")
 
-    return await reload_retriever_from_ingest()
+    # # run ingest in background to avoid client timeout
+    # if background_tasks is not None:
+    #     background_tasks.add_task(reload_retriever_from_ingest)
+    #     return IngestResponse(status="accepted", message="File đã được lưu. Ingest đang chạy nền.", time_taken=0.0)
+    # else:
+    #     return await reload_retriever_from_ingest()
 
 
-
-
-# ---------- API MỚI 3: GET /policies (Liệt kê file trong thư mục data/policy) ----------
-@app.get("/policies", tags=["Admin"])
+# ---------- API: LIST POLICIES (Admin) ----------
+@app.get("/chatbot/policies", tags=["Admin"])
 async def list_policies():
     """
     Trả về danh sách file tài liệu trong thư mục data/policy (đã dùng để Ingest).
@@ -903,3 +531,81 @@ async def list_policies():
             
     print(f"Đã trả về danh sách {len(result)} file chính sách.")
     return result
+
+
+# ---------- NEW: GET POLICY CONTENT (Admin) ----------
+class PolicyContentRequest(BaseModel):
+    filename: str
+
+class PolicyContentResponse(BaseModel):
+    filename: str
+    content: str
+    truncated: bool = False
+
+@app.post("/chatbot/policy_content", response_model=PolicyContentResponse, tags=["Admin"])
+async def get_policy_content(req: PolicyContentRequest):
+    """
+    Trả về nội dung file (text or pdf). Nếu file lớn, trả truncated với truncated=True.
+    """
+    fname = req.filename
+    safe = Path(FILE_DATA_DIR) / Path(fname).name
+    if not safe.exists() or not safe.is_file():
+        raise HTTPException(status_code=404, detail="File không tồn tại.")
+
+    ext = safe.suffix.lower()
+    try:
+        if ext in [".txt", ".md"]:
+            loader = TextLoader(str(safe))
+            docs = loader.load()
+            text = "\n\n".join([d.page_content for d in docs])
+        elif ext == ".pdf":
+            loader = PyPDFLoader(str(safe))
+            docs = loader.load()
+            text = "\n\n".join([d.page_content for d in docs])
+        else:
+            # không hỗ trợ preview cho loại khác
+            raise HTTPException(status_code=400, detail="Loại file không hỗ trợ preview.")
+    except Exception as e:
+        logger.exception("Lỗi khi đọc file: %s", e)
+        raise HTTPException(status_code=500, detail=f"Lỗi khi đọc file: {e}")
+
+    # Giới hạn trả về (ví dụ 20000 ký tự) để tránh trả payload quá lớn
+    MAX_CHARS = 20000
+    truncated = len(text) > MAX_CHARS
+    if truncated:
+        text = text[:MAX_CHARS] + "\n\n...[Nội dung bị rút gọn]"
+    return PolicyContentResponse(filename=safe.name, content=text, truncated=truncated)
+
+
+# ---------- NEW: DELETE POLICY FILE (Admin) ----------
+class PolicyDeleteRequest(BaseModel):
+    filename: str
+
+@app.post("/chatbot/delete_file", response_model=IngestResponse, tags=["Admin"])
+async def delete_policy(req: PolicyDeleteRequest, background_tasks: BackgroundTasks = None):
+    fname = req.filename
+    safe = Path(FILE_DATA_DIR) / Path(fname).name
+    if not safe.exists() or not safe.is_file():
+        raise HTTPException(status_code=404, detail="File không tồn tại.")
+
+    try:
+        safe.unlink()
+        print(f"Đã xóa file: {safe}")
+    except Exception as e:
+        logger.exception("Lỗi khi xóa file: %s", e)
+        raise HTTPException(status_code=500, detail=f"Lỗi khi xóa file: {e}")
+
+    # # chạy ingest nền để cập nhật vectorstore
+    # if background_tasks is not None:
+    #     background_tasks.add_task(reload_retriever_from_ingest)
+    #     return IngestResponse(status="accepted", message="File đã xóa. Ingest đang chạy nền.", time_taken=0.0)
+    # else:
+    #     return await reload_retriever_from_ingest()
+
+
+# ---------- ADMIN: TRIGGER INGEST (nền) ----------
+@app.post("/chatbot/ingest", response_model=IngestResponse, tags=["Admin"])
+async def reload_data(background_tasks: BackgroundTasks):
+    # chạy nền để tránh timeout client
+    background_tasks.add_task(reload_retriever_from_ingest)
+    return IngestResponse(status="accepted", message="Ingest đã được phóng vào nền.", time_taken=0.0)

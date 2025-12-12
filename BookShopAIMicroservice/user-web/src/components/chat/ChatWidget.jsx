@@ -300,12 +300,12 @@
 
 
 
-
+// // src/components/chat/ChatWidget.jsx
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "./ChatWidget.css";
 
-const API_BASE_URL = "http://localhost:8888"; // backend FastAPI
+const API_BASE_URL = "http://localhost:8888/chatbot"; // backend FastAPI
 
 // Định nghĩa cấu trúc tin nhắn để sử dụng trong state
 const initialMessages = [

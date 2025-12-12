@@ -18,16 +18,16 @@ public class AdminUserController {
 
     private final UserService userService;
 
-    // GET /api/admin/users?page=0&size=20&keyword=abc
-    @GetMapping
-    // @PreAuthorize("hasRole('ADMIN')")  // nếu bạn đã cấu hình Spring Security
-    public ResponseEntity<ApiResponse<Page<UserResponseDto>>> listUsers(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String keyword
-    ) {
-        return ResponseEntity.ok(userService.getUsersForAdmin(page, size, keyword));
-    }
+//    // GET /api/admin/users?page=0&size=20&keyword=abc
+//    @GetMapping
+//    // @PreAuthorize("hasRole('ADMIN')")  // nếu bạn đã cấu hình Spring Security
+//    public ResponseEntity<ApiResponse<Page<UserResponseDto>>> listUsers(
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "20") int size,
+//            @RequestParam(required = false) String keyword
+//    ) {
+//        return ResponseEntity.ok(userService.getUsersForAdmin(page, size, keyword));
+//    }
 
     // PATCH /api/admin/users/{uid}/lock
     @PatchMapping("/{uid}/lock")

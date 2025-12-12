@@ -29,8 +29,7 @@ spring:
             - id: user-service
               uri: lb://user-service
               predicates:
-                - Path=/api/users/**
-                - Path=/api/admin/**
+                - Path=/api/users/**, /api/admin/users/**
 
             - id: book-service
               uri: lb://book-service
@@ -42,10 +41,16 @@ spring:
               predicates:
                 - Path=/api/orders/**, /api/carts/**, /api/reviews/**, /api/payments/**, /api/favorites/**, /api/admin/stats/**, /api/admin/analytics/**
 
-            - id: reco-service
+            - id: rec-service
               uri: http://localhost:8000
               predicates:
-                - Path=/cbf/**, /cb/**, /cf/**,
+                - Path=/cbf/**
+
+
+            - id: chatbot-service
+              uri: http://localhost:8888
+              predicates:
+                - Path=/chatbot/**
 
 
 eureka:
