@@ -131,14 +131,15 @@ def load_file_data(data_dir: Path) -> List[Document]:
 
     print(f"Đang tải dữ liệu từ thư mục file: {data_dir}")
     
-    # Loader cho các file .txt (dùng TextLoader để tránh phụ thuộc phức tạp của unstructured)
+    # Loader cho các file .txt (Đã thêm encoding='utf-8' theo đề xuất trước)
     generic_txt_loader = DirectoryLoader(
         path=str(data_dir), 
         glob="**/*.txt", 
         loader_cls=TextLoader,
+        loader_kwargs={"encoding": "utf-8"}, # <--- Thêm Encoding
         silent_errors=True
     )
-    # Loader cho các file .pdf (cần unstructured và pypdf)
+    # Loader cho các file .pdf 
     pdf_loader = DirectoryLoader(
         path=str(data_dir), 
         glob="**/*.pdf",
@@ -162,8 +163,19 @@ def load_file_data(data_dir: Path) -> List[Document]:
     
     docs_with_metadata = []
     for doc in documents:
-        doc.metadata["source"] = "file_policy"
-        doc.metadata["filename"] = doc.metadata.get("source", "Unknown file").replace(str(BASE_DIR), "").lstrip("/")
+        # Lấy đường dẫn file gốc do Loader tạo ra
+        original_path = doc.metadata.get("source", "Unknown file path")
+        
+        # SỬA: Lấy tên file chính xác từ đường dẫn
+        filename = Path(original_path).name 
+
+        # SỬA: Đặt lại metadata 
+        doc.metadata["source"] = "file_policy" # Giữ nguyên loại nguồn chung
+        doc.metadata["filename"] = filename    # Gán tên file chính xác
+        
+        # Thêm metadata 'chunk_source' để trích xuất đầy đủ đường dẫn khi cần thiết
+        # doc.metadata["chunk_source"] = original_path 
+        
         docs_with_metadata.append(doc)
 
     texts = text_splitter.split_documents(docs_with_metadata)
@@ -185,57 +197,6 @@ def get_embeddings():
     return embeddings
 
 
-# def run_ingestion():
-#     """Hàm chính thực hiện Ingest, được gọi từ main.py."""
-#     # 1. Lấy dữ liệu SÁCH từ MySQL
-#     print("Đang tải dữ liệu sách từ MySQL...")
-#     book_rows = fetch_books()
-#     book_docs = [build_book_doc(row) for row in book_rows]
-#     print(f"Lấy được {len(book_docs)} Document sách.")
-    
-#     # 2. Lấy dữ liệu FILE (Chính sách, FAQ)
-#     file_docs = load_file_data(FILE_DATA_DIR)
-    
-#     # 3. Kết hợp toàn bộ Documents
-#     all_docs = book_docs + file_docs
-    
-#     if not all_docs:
-#         print("Không có dữ liệu nào (sách và file), dừng ingest.")
-#         return None
-
-#     embeddings = get_embeddings()
-
-#     # KHẮC PHỤC LỖI TRÙNG DỮ LIỆU:
-#     # Thay vì chỉ rmtree, chúng ta khởi tạo Chroma và delete toàn bộ collection hiện tại
-#     if os.path.exists(PERSIST_DIR):
-#         print(f"Đang dọn dẹp vectorstore cũ tại {PERSIST_DIR}...")
-#         old_db = Chroma(
-#             persist_directory=PERSIST_DIR,
-#             embedding_function=embeddings,
-#             collection_name=COLLECTION_NAME
-#         )
-#         # Xóa toàn bộ dữ liệu trong collection
-#         old_db.delete_collection()
-#         # Đợi một chút để giải phóng file lock
-#         import time
-#         time.sleep(1)
-#         shutil.rmtree(PERSIST_DIR, ignore_errors=True)
-
-#     print(f"Đang tạo vectorstore mới với {len(all_docs)} chunks...")
-    
-#     new_vectorstore = Chroma.from_documents(
-#         documents=all_docs,
-#         embedding=embeddings,
-#         persist_directory=PERSIST_DIR,
-#         collection_name=COLLECTION_NAME,
-#     )
-#     return new_vectorstore
-
-
-
-
-# ingest_data.py
-
 def generate_id(content: str, metadata: dict) -> str:
     """
     Tạo ID duy nhất. 
@@ -245,11 +206,14 @@ def generate_id(content: str, metadata: dict) -> str:
     if metadata.get("source") == "mysql_book":
         unique_key = f"book_{metadata.get('book_id')}"
     else:
-        # Với file, dùng hash nội dung để nếu nội dung trùng thì ID sẽ trùng
+
+        filename = metadata.get("filename", "unknown")
         content_hash = hashlib.md5(content.encode()).hexdigest()
-        unique_key = f"file_{content_hash}"
+        unique_key = f"file_{filename}_{content_hash}"
     
     return unique_key
+
+
 
 def run_ingestion():
     # 1. Lấy dữ liệu

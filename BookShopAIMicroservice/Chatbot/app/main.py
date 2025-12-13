@@ -1,4 +1,3 @@
-# main.py
 import os
 import shutil
 import asyncio
@@ -160,30 +159,41 @@ def get_contextualized_question(llm, chat_history, question):
     })
     return independent_question
 
+# HÀM MỚI: Format lịch sử chat
+def format_history_to_string(history: List['ChatMessage']) -> str:
+    """Chuyển đổi List[ChatMessage] thành chuỗi format cho Prompt."""
+    if not history:
+        return "Không có lịch sử trò chuyện."
+    # Dùng list comprehension để chuyển đổi
+    return "\n".join([f"{msg.role.upper()}: {msg.content}" for msg in history])
+
 
 def build_rag_chain_with_history(llm_generation, llm_contextualize):
-    """Tạo RAG chain mới tích hợp Contextualization."""
+    """Tạo RAG chain mới tích hợp Contextualization và History."""
+    # PROMPT ĐƯỢC CHỈNH SỬA ĐỂ BAO GỒM LỊCH SỬ HỘI THOẠI
     template = """
 Bạn là trợ lý tư vấn và hỗ trợ khách hàng cho một nhà sách online.
-Bạn được cung cấp thông tin liên quan trong phần CONTEXT bên dưới.
-CONTEXT có thể bao gồm:
-1. **Danh sách SÁCH:** Tiêu đề, tác giả, thể loại, giá, đánh giá, tồn kho, mô tả,...
-2. **Các tài liệu Chính sách, FAQ** (ví dụ: chính sách đổi trả, quy định bảo mật).
+Bạn được cung cấp thông tin liên quan trong phần CONTEXT TÀI LIỆU VÀ LỊCH SỬ HỘI THOẠI.
 
----------------------- CONTEXT ----------------------
+---------------------- LỊCH SỬ HỘI THOẠI ----------------------
+{history_str}
+-------------------------------------------------------------
+
+---------------------- CONTEXT TÀI LIỆU ----------------------
 {context}
------------------------------------------------------
+--------------------------------------------------------------
 
 Câu hỏi / yêu cầu của khách: {question}
 
 YÊU CẦU TRẢ LỜI:
-- Dựa CHỦ YẾU vào thông tin trong CONTEXT.
+- Dựa CHỦ YẾU vào thông tin trong CONTEXT TÀI LIỆU VÀ LỊCH SỬ HỘI THOẠI.
+- **Đặc biệt: Nếu câu hỏi liên quan đến thông tin cá nhân (tên, sở thích,...) đã được nhắc trong LỊCH SỬ HỘI THOẠI, hãy sử dụng thông tin đó để trả lời.**
 - **Nếu khách hỏi về sách/gợi ý sách:**
-    + Hãy chọn 3–5 quyển phù hợp nhất từ CONTEXT (nếu có).
+    + Hãy chọn 3–5 quyển phù hợp nhất từ CONTEXT TÀI LIỆU (nếu có).
     + Mỗi sách ghi rõ: tên, tác giả, thể loại chính, giá (xấp xỉ), đối tượng phù hợp.
 - **Nếu khách hỏi về Chính sách/FAQ:**
-    + Tóm tắt và trả lời dựa trên nội dung trong CONTEXT.
-- Nếu CONTEXT không chứa thông tin phù hợp:
+    + Tóm tắt và trả lời dựa trên nội dung trong CONTEXT TÀI LIỆU.
+- Nếu CONTEXT TÀI LIỆU không chứa thông tin phù hợp và câu hỏi không liên quan đến lịch sử chat:
     + Hãy nói rõ là bạn chưa có dữ liệu trong hệ thống hiện tại.
     + Gợi ý khách dùng tính năng tìm kiếm hoặc liên hệ CSKH.
 
@@ -198,12 +208,14 @@ Luôn trả lời bằng TIẾNG VIỆT, giọng thân thiện, rõ ràng.
         )
     )
 
-    # Bước 2: Retrieval và Generation
+    # Bước 2: Retrieval và Generation (TRUYỀN THÊM LỊCH SỬ HỘI THOẠI)
     rag_chain = (
         contextualize_step
         | {
-            "context": lambda x: retriever.invoke(x["question_standalone"]), 
+            "context": lambda x: retriever.invoke(x["question_standalone"]), # Dùng standalone question để tìm kiếm tài liệu
             "question": lambda x: x["question"],
+            # THÊM DÒNG NÀY: Format lịch sử chat và truyền vào Prompt
+            "history_str": lambda x: format_history_to_string(x["history"]),
         }
         | prompt
         | llm_generation
@@ -273,43 +285,6 @@ app.add_middleware(
 
 
 # ---------- HÀM CHUNG ĐỂ RELOAD RETRIEVER SAU INGEST ----------
-# async def reload_retriever_from_ingest():
-#     # ... (Logic giữ nguyên)
-#     global vectorstore, retriever
-    
-#     async with INGEST_LOCK:
-#         print("Bắt đầu quá trình Ingest toàn bộ dữ liệu (MySQL + Files)...")
-#         start_time = time.time()
-        
-#         try:
-#             new_vectorstore = await asyncio.to_thread(run_ingestion)
-            
-#             if new_vectorstore:
-#                 vectorstore = new_vectorstore
-#                 retriever = vectorstore.as_retriever(search_kwargs={"k": 8})
-#                 time_taken = time.time() - start_time
-#                 return IngestResponse(
-#                     status="success", 
-#                     message="Ingest thành công, Retriever đã được cập nhật.",
-#                     time_taken=time_taken
-#                 )
-#             else:
-#                 time_taken = time.time() - start_time
-#                 return IngestResponse(
-#                     status="warning", 
-#                     message="Ingest hoàn tất nhưng không có dữ liệu để nhúng.",
-#                     time_taken=time_taken
-#                 )
-
-#         except Exception as e:
-#             time_taken = time.time() - start_time
-#             print(f"Lỗi trong quá trình Ingest: {e}")
-#             raise HTTPException(status_code=500, detail=f"Lỗi Ingest dữ liệu: {e}")
-
-
-
-
-
 async def reload_retriever_from_ingest():
     global vectorstore, retriever
     
@@ -319,7 +294,6 @@ async def reload_retriever_from_ingest():
         
         try:
             # GIẢI PHÓNG BIẾN TOÀN CỤC TRƯỚC KHI INGEST
-            # Điều này giúp đóng connection tới SQLite của Chroma
             vectorstore = None
             retriever = None
             gc.collect() 
@@ -426,7 +400,7 @@ async def chat(req: ChatRequest):
     if rag_chain is None:
         return ChatResponse(
             answer="Hiện tại dịch vụ LLM (Gemini) chưa được cấu hình GOOGLE_API_KEY. "
-                   "Hãy liên hệ admin để cấu hình khóa API."
+                     "Hãy liên hệ admin để cấu hình khóa API."
         )
 
     try:
@@ -480,9 +454,8 @@ async def upload_document(
             detail=f"Chỉ chấp nhận các file có định dạng: {', '.join(allowed_extensions)}"
         )
     
-    # Use safe filename + timestamp
+    # Use safe filename 
     FILE_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    # safe_name = f"{int(time.time())}_{secure_filename(file.filename)}"
     safe_name = secure_filename(file.filename)
     upload_path = Path(FILE_DATA_DIR) / safe_name
     
@@ -494,12 +467,8 @@ async def upload_document(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Lỗi khi lưu file: {e}")
 
-    # # run ingest in background to avoid client timeout
-    # if background_tasks is not None:
-    #     background_tasks.add_task(reload_retriever_from_ingest)
-    #     return IngestResponse(status="accepted", message="File đã được lưu. Ingest đang chạy nền.", time_taken=0.0)
-    # else:
-    #     return await reload_retriever_from_ingest()
+    # Chạy ingest ngay lập tức 
+    # return await reload_retriever_from_ingest()
 
 
 # ---------- API: LIST POLICIES (Admin) ----------
@@ -595,12 +564,8 @@ async def delete_policy(req: PolicyDeleteRequest, background_tasks: BackgroundTa
         logger.exception("Lỗi khi xóa file: %s", e)
         raise HTTPException(status_code=500, detail=f"Lỗi khi xóa file: {e}")
 
-    # # chạy ingest nền để cập nhật vectorstore
-    # if background_tasks is not None:
-    #     background_tasks.add_task(reload_retriever_from_ingest)
-    #     return IngestResponse(status="accepted", message="File đã xóa. Ingest đang chạy nền.", time_taken=0.0)
-    # else:
-    #     return await reload_retriever_from_ingest()
+    # Chạy ingest ngay lập tức để cập nhật vectorstore
+    # return await reload_retriever_from_ingest()
 
 
 # ---------- ADMIN: TRIGGER INGEST (nền) ----------

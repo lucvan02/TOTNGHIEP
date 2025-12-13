@@ -1,3 +1,4 @@
+// src/pages/Chatbot/ChatbotManage.jsx
 import React, { useEffect, useState } from "react";
 import { 
   Table, Button, Modal, Upload, Progress, Card, 

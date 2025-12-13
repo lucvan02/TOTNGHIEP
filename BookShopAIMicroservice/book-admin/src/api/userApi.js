@@ -29,7 +29,7 @@
 import axiosClient from "./axiosClient";
 
 //tao bien baseURL de dung chung cho cac api lien quan den user
-const baseURL = "http://localhost:8082/api/admin/users";
+const baseURL = "http://localhost:8080/api/admin/users";
 const userApi = {
   getAdminUsers: (page = 0, size = 20, keyword = "") =>
     axiosClient.get(

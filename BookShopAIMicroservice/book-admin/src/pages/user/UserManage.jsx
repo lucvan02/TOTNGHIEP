@@ -373,7 +373,7 @@ const UserManage = () => {
       title: "UID",
       dataIndex: "uid",
       key: "uid",
-      width: 220,
+      width: 300,
       ellipsis: true,
     },
     {
@@ -456,12 +456,12 @@ const UserManage = () => {
   const orderColumns = [
     {
       title: "Mã đơn",
-      dataIndex: "code",
+      dataIndex: "id",
       width: 180,
     },
     {
       title: "Tổng tiền",
-      dataIndex: "totalAmount",
+      dataIndex: "total",
       width: 150,
       render: (v) => money(v),
     },
