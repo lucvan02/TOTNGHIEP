@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "./ChatWidget.css";
+import ReactMarkdown from 'react-markdown';
 
 const API_BASE_URL = "http://localhost:8888/chatbot"; // backend FastAPI
 
@@ -271,14 +272,30 @@ export default function ChatWidget() {
               <div key={i} className={`chat-msg ${msg.from}`}>
                 <div className="chat-bubble-wrapper">
                   {/* Text */}
-                  {msg.text && (
+
+                  {/* {msg.text && (
                     <div
                       className="chat-bubble"
                       dangerouslySetInnerHTML={{
                         __html: msg.text.replace(/\n/g, "<br />"),
                       }}
                     />
-                  )}
+                  )} */}
+
+                  {msg.text && (
+                  <div className="chat-bubble">
+                    {msg.from === "bot" && !msg.isSystem ? (
+                      /* SỬA TẠI ĐÂY: Xóa className khỏi ReactMarkdown và bọc bằng div */
+                      <div className="markdown-content">
+                        <ReactMarkdown>
+                          {msg.text}
+                        </ReactMarkdown>
+                      </div>
+                    ) : (
+                      <div dangerouslySetInnerHTML={{ __html: msg.text.replace(/\n/g, "<br />") }} />
+                    )}
+                  </div>
+                )}
 
                   {/* Nếu có books -> render list card */}
                   {msg.books && Array.isArray(msg.books) && msg.books.length > 0 && (

@@ -204,7 +204,7 @@ export default function ChatbotManage() {
       key: "action",
       render: (_, record) => (
         <Space size="middle">
-          <Button type="link" icon={<EyeOutlined />} onClick={() => handlePreviewServer(record.filename)}>Xem</Button>
+          {/* <Button type="link" icon={<EyeOutlined />} onClick={() => handlePreviewServer(record.filename)}>Xem</Button> */}
           <Popconfirm title="Xóa tài liệu?" onConfirm={() => handleDelete(record.filename)} okText="Xóa" cancelText="Hủy" okButtonProps={{ danger: true }}>
             <Button type="link" danger icon={<DeleteOutlined />}>Xóa</Button>
           </Popconfirm>

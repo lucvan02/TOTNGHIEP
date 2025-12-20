@@ -156,6 +156,16 @@ export default function Profile() {
             </Box>
 
             {/* Thông tin người dùng */}
+
+            {/* thêm cột uid */}
+            <TextField
+              label="UID"
+              name="uid"
+              value={form.uid || ""}
+              onChange={handleChange}
+              fullWidth
+              disabled
+            />
             <TextField
               label="Email"
               name="email"
@@ -166,16 +176,16 @@ export default function Profile() {
             />
             <TextField
               label="Họ"
-              name="firstname"
-              value={form.firstname || ""}
+              name="lastname"
+              value={form.lastname || ""}
               onChange={handleChange}
               fullWidth
               disabled={!isEditing}
             />
             <TextField
               label="Tên"
-              name="lastname"
-              value={form.lastname || ""}
+              name="firstname"
+              value={form.firstname || ""}
               onChange={handleChange}
               fullWidth
               disabled={!isEditing}

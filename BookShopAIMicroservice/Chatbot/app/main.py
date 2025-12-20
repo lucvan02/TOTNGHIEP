@@ -201,20 +201,51 @@ Luôn trả lời bằng TIẾNG VIỆT, giọng thân thiện, rõ ràng.
 """
     prompt = ChatPromptTemplate.from_template(template)
     
-    # Bước 1: Contextualize Question
-    contextualize_step = RunnablePassthrough.assign(
-        question_standalone=lambda x: get_contextualized_question(
+    # # Bước 1: Contextualize Question
+    # contextualize_step = RunnablePassthrough.assign(
+    #     question_standalone=lambda x: get_contextualized_question(
+    #         llm_contextualize, x['history'], x['question']
+    #     )
+    # )
+
+    # # Bước 2: Retrieval và Generation (TRUYỀN THÊM LỊCH SỬ HỘI THOẠI)
+    # rag_chain = (
+    #     contextualize_step
+    #     | {
+    #         "context": lambda x: retriever.invoke(x["question_standalone"]), # Dùng standalone question để tìm kiếm tài liệu
+    #         "question": lambda x: x["question"],
+    #         #Format lịch sử chat và truyền vào Prompt
+    #         "history_str": lambda x: format_history_to_string(x["history"]),
+    #     }
+    #     | prompt
+    #     | llm_generation
+    #     | StrOutputParser()
+    # )
+    # return rag_chain
+
+    # Tạo một hàm phụ để vừa lấy câu hỏi, vừa in ra màn hình console
+    def get_and_print_standalone(x):
+        standalone = get_contextualized_question(
             llm_contextualize, x['history'], x['question']
         )
+        # IN RA CONSOLE ĐỂ KIỂM TRA
+        print(f"\n" + "="*50)
+        print(f"🔍 [DEBUG] CÂU HỎI GỐC: {x['question']}")
+        print(f"🤖 [DEBUG] CÂU HỎI ĐỘC LẬP: {standalone}")
+        print("="*50 + "\n")
+        return standalone
+
+    # Bước 1: Contextualize Question (Cập nhật lại để dùng hàm in trên)
+    contextualize_step = RunnablePassthrough.assign(
+        question_standalone=lambda x: get_and_print_standalone(x)
     )
 
-    # Bước 2: Retrieval và Generation (TRUYỀN THÊM LỊCH SỬ HỘI THOẠI)
+    # Bước 2: Retrieval và Generation
     rag_chain = (
         contextualize_step
         | {
-            "context": lambda x: retriever.invoke(x["question_standalone"]), # Dùng standalone question để tìm kiếm tài liệu
+            "context": lambda x: retriever.invoke(x["question_standalone"]),
             "question": lambda x: x["question"],
-            # THÊM DÒNG NÀY: Format lịch sử chat và truyền vào Prompt
             "history_str": lambda x: format_history_to_string(x["history"]),
         }
         | prompt
