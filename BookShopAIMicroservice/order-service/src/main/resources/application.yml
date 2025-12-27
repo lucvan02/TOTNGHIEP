@@ -58,15 +58,40 @@ resilience4j:
 
 
 
+#vnpay:
+#  tmnCode: MFJL9FWU      # mã terminal từ sandbox
+#  hashSecret: 8CN65DWHZQF9Y41FLZ0JN0EDO9U5RQY3 # key bí mật từ sandbox
+#  url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html   # url thanh toán
+#  returnUrl: http://localhost:8084/api/orders/vnpay-return  # url hoàn trả sau khi thanh toán
+#  apiUrl: https://sandbox.vnpayment.vn/merchant_webapi/api/transaction   # url hoàn trả kết quả giao dịch
+#
+#app:
+#  frontendUrl: http://localhost:3000   # đổi nếu FE chạy domain khác
+
+
 vnpay:
-  tmnCode: MFJL9FWU      # mã terminal từ sandbox
-  hashSecret: 8CN65DWHZQF9Y41FLZ0JN0EDO9U5RQY3 # key bí mật từ sandbox
-  url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html   # url thanh toán
+  tmnCode: MAYNIZEF
+  hashSecret: VNXPPVQKNXYP9SV5AAJHWG2XYCLBLN2D
+  url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
   returnUrl: http://localhost:8084/api/orders/vnpay-return  # url hoàn trả sau khi thanh toán
   apiUrl: https://sandbox.vnpayment.vn/merchant_webapi/api/transaction   # url hoàn trả kết quả giao dịch
 
 app:
-  frontendUrl: http://localhost:3000   # đổi nếu FE chạy domain khác
+  frontendUrl: http://localhost:3000
+
+
+
+#vnpay:
+#  tmnCode: NVINLU87
+#  hashSecret: ASSSM55A5Z8DB3F45ZTLE92X7IYKC53X
+#  url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+#  returnUrl: http://localhost:8084/api/orders/vnpay-return  # url hoàn trả sau khi thanh toán
+#  apiUrl: https://sandbox.vnpayment.vn/merchant_webapi/api/transaction   # url hoàn trả kết quả giao dịch
+#
+#app:
+#  frontendUrl: http://localhost:3000
+
+
 
 
 

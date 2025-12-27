@@ -217,7 +217,7 @@ export default function Home() {
                 color="text.secondary"
                 mt={5}
               >
-                Không có sách nào.
+                Đang tải...
               </Typography>
             )}
           </>

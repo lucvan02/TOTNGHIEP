@@ -282,7 +282,7 @@ export default function Recommend() {
           </Grid>
         ) : (
           <Typography color="text.secondary">
-            Không có gợi ý đạt ngưỡng điểm {SCORE_THRESHOLD}. Hãy đánh giá/yêu thích thêm để hệ thống hiểu khẩu vị của bạn.
+            Chưa có dữ liệu để gợi ý. Hãy đánh giá/yêu thích thêm để hệ thống hiểu khẩu vị của bạn.
           </Typography>
         )}
       </Box>
