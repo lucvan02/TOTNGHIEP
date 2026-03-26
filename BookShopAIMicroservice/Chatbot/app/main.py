@@ -190,7 +190,7 @@ YÊU CẦU TRẢ LỜI:
 - **Đặc biệt: Nếu câu hỏi liên quan đến thông tin cá nhân (tên, sở thích,...) đã được nhắc trong LỊCH SỬ HỘI THOẠI, hãy sử dụng thông tin đó để trả lời.**
 - **Nếu khách hỏi về sách/gợi ý sách:**
     + Hãy chọn 3–5 quyển phù hợp nhất từ CONTEXT TÀI LIỆU (nếu có).
-    + Mỗi sách ghi rõ: tên, tác giả, thể loại chính, giá (xấp xỉ), đối tượng phù hợp.
+    + Mỗi sách ghi rõ: tên, tác giả, thể loại chính, giá (xấp xỉ), đối tượng phù hợp, nút xem chi tiết(với link là http://localhost:3000/book/bookID).
 - **Nếu khách hỏi về Chính sách/FAQ:**
     + Tóm tắt và trả lời dựa trên nội dung trong CONTEXT TÀI LIỆU.
 - Nếu CONTEXT TÀI LIỆU không chứa thông tin phù hợp và câu hỏi không liên quan đến lịch sử chat:

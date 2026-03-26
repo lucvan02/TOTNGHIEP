@@ -175,7 +175,7 @@ async function fetchBooksByIds(ids) {
     .map((p) => p.value.data.data);
 }
 
-const SCORE_THRESHOLD = 0.5; // chỉ lấy gợi ý có điểm >= 0.5
+const SCORE_THRESHOLD = 0.4; // chỉ lấy gợi ý có điểm >= 0.5
 
 export default function Recommend() {
   const [uid, setUid] = useState(getUid());
